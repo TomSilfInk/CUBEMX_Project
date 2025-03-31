@@ -49,3 +49,7 @@ Le STM32F407 dispose de plusieurs timers qui peuvent être configurés pour gén
 - La mesure de distance doit être effectuée toutes les 250 ms
 - Le signal PWM pour le servo-moteur doit être configuré selon les spécifications du servo utilisé
 - Un protocole de communication série doit être défini (suggestion : utiliser 1 octet)
+  
+## Diagramme de classe
+
+![Diagramme de classe du projet](./Images/diagramme_classes.png)
