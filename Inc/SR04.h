@@ -5,10 +5,10 @@
 #include <stdint.h>
 
 // Définir les broches utilisées pour le capteur SR04
-#define SR04_TRIGGER_PIN GPIO_PIN_9
-#define SR04_TRIGGER_PORT GPIOE
-#define SR04_ECHO_PIN GPIO_PIN_12
-#define SR04_ECHO_PORT GPIOD
+#define SR04_TRIGGER_PIN GPIO_PIN_1
+#define SR04_TRIGGER_PORT GPIOA
+#define SR04_ECHO_PIN GPIO_PIN_5
+#define SR04_ECHO_PORT GPIOA
 
 // Prototypes des fonctions
 void SR04_Init(void);
