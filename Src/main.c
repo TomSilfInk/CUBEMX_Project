@@ -12,6 +12,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "motor.h" // Inclure le fichier d'en-tête du moteur
 #include <string.h> // Pour utiliser strlen()
 
 /* Private function prototypes -----------------------------------------------*/
@@ -35,9 +36,12 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
 
+  //Initialisation du moteur
+  Motor_Init();
   /* Infinite loop */
   while (1)
   {
+    Motor_Sweep(); // Balayage du moteur
     // Envoyer "Hello, World!" via UART
     HAL_UART_Transmit(&huart2, (uint8_t *)"Hello, World!\r\n", strlen("Hello, World!\r\n"), HAL_MAX_DELAY);
 

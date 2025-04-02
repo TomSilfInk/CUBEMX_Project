@@ -1,0 +1,255 @@
+ARM GAS  /tmp/ccpdOUkB.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"motor.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Src/motor.c"
+  20              		.section	.text.Motor_Init,"ax",%progbits
+  21              		.align	1
+  22              		.global	Motor_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	Motor_Init:
+  28              	.LFB134:
+   1:Src/motor.c   **** #include "motor.h"
+   2:Src/motor.c   **** #include "tim.h" // Pour accéder aux fonctions liées au timer
+   3:Src/motor.c   **** 
+   4:Src/motor.c   **** void Motor_Init(void)
+   5:Src/motor.c   **** {
+  29              		.loc 1 5 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33 0000 08B5     		push	{r3, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+  36              		.cfi_offset 3, -8
+  37              		.cfi_offset 14, -4
+   6:Src/motor.c   ****     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  38              		.loc 1 6 5 view .LVU1
+  39 0002 0021     		movs	r1, #0
+  40 0004 0148     		ldr	r0, .L3
+  41 0006 FFF7FEFF 		bl	HAL_TIM_PWM_Start
+  42              	.LVL0:
+   7:Src/motor.c   **** }
+  43              		.loc 1 7 1 is_stmt 0 view .LVU2
+  44 000a 08BD     		pop	{r3, pc}
+  45              	.L4:
+  46              		.align	2
+  47              	.L3:
+  48 000c 00000000 		.word	htim3
+  49              		.cfi_endproc
+  50              	.LFE134:
+  52              		.section	.text.Motor_SetPosition,"ax",%progbits
+ARM GAS  /tmp/ccpdOUkB.s 			page 2
+
+
+  53              		.align	1
+  54              		.global	Motor_SetPosition
+  55              		.syntax unified
+  56              		.thumb
+  57              		.thumb_func
+  59              	Motor_SetPosition:
+  60              	.LVL1:
+  61              	.LFB135:
+   8:Src/motor.c   **** 
+   9:Src/motor.c   **** void Motor_SetPosition(int angle)
+  10:Src/motor.c   **** {
+  62              		.loc 1 10 1 is_stmt 1 view -0
+  63              		.cfi_startproc
+  64              		@ args = 0, pretend = 0, frame = 0
+  65              		@ frame_needed = 0, uses_anonymous_args = 0
+  66              		@ link register save eliminated.
+  11:Src/motor.c   ****     if (angle < 0)
+  67              		.loc 1 11 5 view .LVU4
+  68              		.loc 1 11 8 is_stmt 0 view .LVU5
+  69 0000 0028     		cmp	r0, #0
+  70              		.loc 1 11 8 view .LVU6
+  71 0002 03DB     		blt	.L7
+  12:Src/motor.c   ****         angle = 0;
+  13:Src/motor.c   ****     if (angle > 180)
+  72              		.loc 1 13 5 is_stmt 1 view .LVU7
+  73              		.loc 1 13 8 is_stmt 0 view .LVU8
+  74 0004 B428     		cmp	r0, #180
+  75 0006 02DD     		ble	.L6
+  14:Src/motor.c   ****         angle = 180;
+  76              		.loc 1 14 15 view .LVU9
+  77 0008 B420     		movs	r0, #180
+  78              	.LVL2:
+  79              		.loc 1 14 15 view .LVU10
+  80 000a 00E0     		b	.L6
+  81              	.LVL3:
+  82              	.L7:
+  12:Src/motor.c   ****         angle = 0;
+  83              		.loc 1 12 15 view .LVU11
+  84 000c 0020     		movs	r0, #0
+  85              	.LVL4:
+  86              	.L6:
+  15:Src/motor.c   **** 
+  16:Src/motor.c   ****     uint16_t pulse_width = 5 + (angle * 2) / 45;
+  87              		.loc 1 16 5 is_stmt 1 view .LVU12
+  88              		.loc 1 16 39 is_stmt 0 view .LVU13
+  89 000e 4000     		lsls	r0, r0, #1
+  90              	.LVL5:
+  91              		.loc 1 16 44 view .LVU14
+  92 0010 064A     		ldr	r2, .L9
+  93 0012 82FB0032 		smull	r3, r2, r2, r0
+  94 0016 0244     		add	r2, r2, r0
+  95 0018 C317     		asrs	r3, r0, #31
+  96 001a C3EB6213 		rsb	r3, r3, r2, asr #5
+  97              		.loc 1 16 30 view .LVU15
+  98 001e 9BB2     		uxth	r3, r3
+  99              		.loc 1 16 14 view .LVU16
+ 100 0020 0533     		adds	r3, r3, #5
+ARM GAS  /tmp/ccpdOUkB.s 			page 3
+
+
+ 101 0022 9BB2     		uxth	r3, r3
+ 102              	.LVL6:
+  17:Src/motor.c   ****     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+ 103              		.loc 1 17 5 is_stmt 1 view .LVU17
+ 104 0024 024A     		ldr	r2, .L9+4
+ 105 0026 1268     		ldr	r2, [r2]
+ 106 0028 5363     		str	r3, [r2, #52]
+  18:Src/motor.c   **** }
+ 107              		.loc 1 18 1 is_stmt 0 view .LVU18
+ 108 002a 7047     		bx	lr
+ 109              	.L10:
+ 110              		.align	2
+ 111              	.L9:
+ 112 002c B7600BB6 		.word	-1240768329
+ 113 0030 00000000 		.word	htim3
+ 114              		.cfi_endproc
+ 115              	.LFE135:
+ 117              		.section	.text.Motor_Sweep,"ax",%progbits
+ 118              		.align	1
+ 119              		.global	Motor_Sweep
+ 120              		.syntax unified
+ 121              		.thumb
+ 122              		.thumb_func
+ 124              	Motor_Sweep:
+ 125              	.LFB136:
+  19:Src/motor.c   **** 
+  20:Src/motor.c   **** void Motor_Sweep(void)
+  21:Src/motor.c   **** {
+ 126              		.loc 1 21 1 is_stmt 1 view -0
+ 127              		.cfi_startproc
+ 128              		@ args = 0, pretend = 0, frame = 0
+ 129              		@ frame_needed = 0, uses_anonymous_args = 0
+ 130 0000 08B5     		push	{r3, lr}
+ 131              	.LCFI1:
+ 132              		.cfi_def_cfa_offset 8
+ 133              		.cfi_offset 3, -8
+ 134              		.cfi_offset 14, -4
+  22:Src/motor.c   ****     static int angle = 0;
+ 135              		.loc 1 22 5 view .LVU20
+  23:Src/motor.c   ****     static int direction = 1;
+ 136              		.loc 1 23 5 view .LVU21
+  24:Src/motor.c   **** 
+  25:Src/motor.c   ****     angle += direction;
+ 137              		.loc 1 25 5 view .LVU22
+ 138              		.loc 1 25 11 is_stmt 0 view .LVU23
+ 139 0002 094B     		ldr	r3, .L14
+ 140 0004 1B68     		ldr	r3, [r3]
+ 141 0006 094A     		ldr	r2, .L14+4
+ 142 0008 1068     		ldr	r0, [r2]
+ 143 000a 1844     		add	r0, r0, r3
+ 144 000c 1060     		str	r0, [r2]
+  26:Src/motor.c   **** 
+  27:Src/motor.c   ****     if (angle >= 180 || angle <= 0)
+ 145              		.loc 1 27 5 is_stmt 1 view .LVU24
+ 146              		.loc 1 27 22 is_stmt 0 view .LVU25
+ 147 000e 421E     		subs	r2, r0, #1
+ 148              		.loc 1 27 8 view .LVU26
+ARM GAS  /tmp/ccpdOUkB.s 			page 4
+
+
+ 149 0010 B22A     		cmp	r2, #178
+ 150 0012 02D9     		bls	.L12
+  28:Src/motor.c   ****     {
+  29:Src/motor.c   ****         direction = -direction;
+ 151              		.loc 1 29 9 is_stmt 1 view .LVU27
+ 152              		.loc 1 29 21 is_stmt 0 view .LVU28
+ 153 0014 5B42     		rsbs	r3, r3, #0
+ 154              		.loc 1 29 19 view .LVU29
+ 155 0016 044A     		ldr	r2, .L14
+ 156 0018 1360     		str	r3, [r2]
+ 157              	.L12:
+  30:Src/motor.c   ****     }
+  31:Src/motor.c   **** 
+  32:Src/motor.c   ****     Motor_SetPosition(angle);
+ 158              		.loc 1 32 5 is_stmt 1 view .LVU30
+ 159 001a FFF7FEFF 		bl	Motor_SetPosition
+ 160              	.LVL7:
+  33:Src/motor.c   ****     HAL_Delay(20);
+ 161              		.loc 1 33 5 view .LVU31
+ 162 001e 1420     		movs	r0, #20
+ 163 0020 FFF7FEFF 		bl	HAL_Delay
+ 164              	.LVL8:
+  34:Src/motor.c   **** }...
+ 165              		.loc 1 34 1 is_stmt 0 view .LVU32
+ 166 0024 08BD     		pop	{r3, pc}
+ 167              	.L15:
+ 168 0026 00BF     		.align	2
+ 169              	.L14:
+ 170 0028 00000000 		.word	direction.0
+ 171 002c 00000000 		.word	angle.1
+ 172              		.cfi_endproc
+ 173              	.LFE136:
+ 175              		.section	.data.direction.0,"aw"
+ 176              		.align	2
+ 179              	direction.0:
+ 180 0000 01000000 		.word	1
+ 181              		.section	.bss.angle.1,"aw",%nobits
+ 182              		.align	2
+ 185              	angle.1:
+ 186 0000 00000000 		.space	4
+ 187              		.text
+ 188              	.Letext0:
+ 189              		.file 2 "/usr/lib/gcc/arm-none-eabi/13.2.1/include/stdint.h"
+ 190              		.file 3 "Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h"
+ 191              		.file 4 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h"
+ 192              		.file 5 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h"
+ 193              		.file 6 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h"
+ 194              		.file 7 "Inc/tim.h"
+ 195              		.file 8 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h"
+ARM GAS  /tmp/ccpdOUkB.s 			page 5
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 motor.c
+     /tmp/ccpdOUkB.s:21     .text.Motor_Init:00000000 $t
+     /tmp/ccpdOUkB.s:27     .text.Motor_Init:00000000 Motor_Init
+     /tmp/ccpdOUkB.s:48     .text.Motor_Init:0000000c $d
+     /tmp/ccpdOUkB.s:53     .text.Motor_SetPosition:00000000 $t
+     /tmp/ccpdOUkB.s:59     .text.Motor_SetPosition:00000000 Motor_SetPosition
+     /tmp/ccpdOUkB.s:112    .text.Motor_SetPosition:0000002c $d
+     /tmp/ccpdOUkB.s:118    .text.Motor_Sweep:00000000 $t
+     /tmp/ccpdOUkB.s:124    .text.Motor_Sweep:00000000 Motor_Sweep
+     /tmp/ccpdOUkB.s:170    .text.Motor_Sweep:00000028 $d
+     /tmp/ccpdOUkB.s:179    .data.direction.0:00000000 direction.0
+     /tmp/ccpdOUkB.s:185    .bss.angle.1:00000000 angle.1
+     /tmp/ccpdOUkB.s:176    .data.direction.0:00000000 $d
+     /tmp/ccpdOUkB.s:182    .bss.angle.1:00000000 $d
+
+UNDEFINED SYMBOLS
+HAL_TIM_PWM_Start
+htim3
+HAL_Delay
