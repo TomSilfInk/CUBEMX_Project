@@ -20,10 +20,16 @@
 #include "main.h"
 #include "tim.h"
 #include "usart.h"
-#include "gpio.h"
+#include "usb_otg.h"
+#include "../Inc/gpio.h"
+#include "../Inc/usb_otg.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* USER CODE END Includes */
 
@@ -45,7 +51,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint8_t rx_buffer[10]; // Buffer pour recevoir les données UART
+uint8_t position = 0;  // Position actuelle du servo
+uint8_t USB_Rx_Buffer[64]; // Buffer pour les données reçues via USB
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +64,38 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
+{
+    // Copiez les données reçues dans le buffer
+    memcpy(USB_Rx_Buffer, Buf, *Len);
+
+    // Convertir la commande reçue en entier (position en degrés)
+    int angle = atoi((char *)USB_Rx_Buffer);
+
+    // Vérifier que l'angle est valide (entre 0° et 180°)
+    if (angle >= 0 && angle <= 180)
+    {
+        // Calculer la durée de l'état haut correspondante
+        uint16_t pulse_width = 5 + (angle * 2) / 45; // Conversion angle -> pulse_width
+
+        // Appliquer la nouvelle position au servo
+        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+
+        // Envoyer un message de confirmation via USB
+        char msg[50];
+        snprintf(msg, sizeof(msg), "Position definie: %d degres\r\n", angle);
+        CDC_Transmit_FS((uint8_t *)msg, strlen(msg));
+    }
+    else
+    {
+        // Envoyer un message d'erreur si l'angle est invalide
+        char error_msg[] = "Erreur: Angle invalide (0-180 seulement)\r\n";
+        CDC_Transmit_FS((uint8_t *)error_msg, strlen(error_msg));
+    }
+
+    return USBD_OK;
+}
 
 /* USER CODE END 0 */
 
@@ -89,19 +129,53 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_TIM2_Init();
+  MX_TIM1_Init();
+  MX_TIM3_Init();
+  MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+      // Lire une commande via UART
+      if (HAL_UART_Receive(&huart2, rx_buffer, sizeof(rx_buffer), HAL_MAX_DELAY) == HAL_OK)
+      {
+          // Convertir la commande reçue en entier (position en degrés)
+          int angle = atoi((char *)rx_buffer);
+
+          // Vérifier que l'angle est valide (entre 0° et 180°)
+          if (angle >= 0 && angle <= 180)
+          {
+              // Calculer la durée de l'état haut correspondante
+              uint16_t pulse_width = 5 + (angle * 2) / 45; // Conversion angle -> pulse_width
+
+              // Appliquer la nouvelle position au servo
+              __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+
+              // Envoyer un message de confirmation via UART
+              char msg[50];
+              snprintf(msg, sizeof(msg), "Position definie: %d degres\r\n", angle);
+              HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
+          }
+          else
+          {
+              // Envoyer un message d'erreur si l'angle est invalide
+              char error_msg[] = "Erreur: Angle invalide (0-180 seulement)\r\n";
+              HAL_UART_Transmit(&huart2, (uint8_t *)error_msg, strlen(error_msg), HAL_MAX_DELAY);
+          }
+
+          // Réinitialiser le buffer
+          memset(rx_buffer, 0, sizeof(rx_buffer));
+      }
+  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
   /* USER CODE END 3 */
 }
 
@@ -125,7 +199,12 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 16;
+  RCC_OscInitStruct.PLL.PLLN = 192;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
