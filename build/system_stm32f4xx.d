@@ -24,7 +24,14 @@ build/system_stm32f4xx.o: Src/system_stm32f4xx.c \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
+<<<<<<< HEAD
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+=======
+ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
+ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h \
+ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h \
+ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h
+>>>>>>> Correction
 Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h:
 Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f407xx.h:
 Drivers/CMSIS/Include/core_cm4.h:
@@ -53,3 +60,9 @@ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+<<<<<<< HEAD
+=======
+Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd.h:
+Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usb.h:
+Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pcd_ex.h:
+>>>>>>> Correction

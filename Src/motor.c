@@ -1,6 +1,7 @@
 #include "motor.h"
 #include "tim.h" // Pour accéder aux fonctions liées au timer
 
+<<<<<<< HEAD
 /**
  * @brief Initialise le moteur (servo-moteur).
  * Configure le timer et démarre le signal PWM.
@@ -18,11 +19,21 @@ void Motor_Init(void)
 void Motor_SetPosition(int angle)
 {
     // Vérifier que l'angle est valide
+=======
+void Motor_Init(void)
+{
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+}
+
+void Motor_SetPosition(int angle)
+{
+>>>>>>> Correction
     if (angle < 0)
         angle = 0;
     if (angle > 180)
         angle = 180;
 
+<<<<<<< HEAD
     // Calculer la largeur d'impulsion correspondante
     uint16_t pulse_width = 5 + (angle * 2) / 45; // Conversion angle -> pulse_width
 
@@ -42,14 +53,32 @@ void Motor_Sweep(void)
     angle += direction;
 
     // Inverser la direction si on atteint les limites (0° ou 180°)
+=======
+    uint16_t pulse_width = 5 + (angle * 2) / 45;
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+}
+
+void Motor_Sweep(void)
+{
+    static int angle = 0;
+    static int direction = 1;
+
+    angle += direction;
+
+>>>>>>> Correction
     if (angle >= 180 || angle <= 0)
     {
         direction = -direction;
     }
 
+<<<<<<< HEAD
     // Appliquer la nouvelle position
     Motor_SetPosition(angle);
 
     // Attendre un moment pour que le servo atteigne la position
     HAL_Delay(20); // 20 ms (ajustez si nécessaire)
+=======
+    Motor_SetPosition(angle);
+    HAL_Delay(20);
+>>>>>>> Correction
 }

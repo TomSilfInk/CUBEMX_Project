@@ -68,6 +68,8 @@ int main(void)
     /* Initialiser le moteur */
     Motor_Init();
 
+  //Initialisation du moteur
+  Motor_Init();
   /* Infinite loop */
   while (1)
   {

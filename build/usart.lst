@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 1
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 1
+>>>>>>> Correction
 
 
    1              		.cpu cortex-m4
@@ -58,7 +62,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
   28:Src/usart.c   **** 
   29:Src/usart.c   **** /* USART2 init function */
   30:Src/usart.c   **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 2
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 2
+>>>>>>> Correction
 
 
   31:Src/usart.c   **** void MX_USART2_UART_Init(void)
@@ -118,7 +126,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
   65              		.loc 1 48 28 is_stmt 0 view .LVU16
   66 001c C361     		str	r3, [r0, #28]
   49:Src/usart.c   ****   if (HAL_UART_Init(&huart2) != HAL_OK)
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 3
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 3
+>>>>>>> Correction
 
 
   67              		.loc 1 49 3 is_stmt 1 view .LVU17
@@ -178,7 +190,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
  111              	.LCFI2:
  112              		.cfi_def_cfa_offset 40
   61:Src/usart.c   **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 4
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 4
+>>>>>>> Correction
 
 
   62:Src/usart.c   ****   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -238,7 +254,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
  138              	.L10:
  139              	.LCFI4:
  140              		.cfi_restore_state
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 5
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 5
+>>>>>>> Correction
 
 
   69:Src/usart.c   **** 
@@ -298,7 +318,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
   77:Src/usart.c   ****     GPIO_InitStruct.Pull = GPIO_NOPULL;
  180              		.loc 1 77 26 is_stmt 0 view .LVU46
  181 004e 0223     		movs	r3, #2
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 6
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 6
+>>>>>>> Correction
 
 
  182 0050 0493     		str	r3, [sp, #16]
@@ -358,7 +382,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
   91:Src/usart.c   **** 
   92:Src/usart.c   **** void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
   93:Src/usart.c   **** {
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 7
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 7
+>>>>>>> Correction
 
 
  229              		.loc 1 93 1 is_stmt 1 view -0
@@ -418,7 +446,11 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
  259 0018 0548     		ldr	r0, .L17+8
  260              	.LVL12:
  107:Src/usart.c   **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 8
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 8
+>>>>>>> Correction
 
 
  261              		.loc 1 107 5 is_stmt 0 view .LVU65
@@ -459,11 +491,16 @@ ARM GAS  /tmp/cc2F8HMm.s 			page 1
  294              		.file 8 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h"
  295              		.file 9 "Inc/usart.h"
  296              		.file 10 "Inc/main.h"
+<<<<<<< HEAD
 ARM GAS  /tmp/cc2F8HMm.s 			page 9
+=======
+ARM GAS  /tmp/ccire4jk.s 			page 9
+>>>>>>> Correction
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 usart.c
+<<<<<<< HEAD
      /tmp/cc2F8HMm.s:21     .text.MX_USART2_UART_Init:00000000 $t
      /tmp/cc2F8HMm.s:27     .text.MX_USART2_UART_Init:00000000 MX_USART2_UART_Init
      /tmp/cc2F8HMm.s:85     .text.MX_USART2_UART_Init:0000002c $d
@@ -475,6 +512,19 @@ DEFINED SYMBOLS
      /tmp/cc2F8HMm.s:226    .text.HAL_UART_MspDeInit:00000000 HAL_UART_MspDeInit
      /tmp/cc2F8HMm.s:273    .text.HAL_UART_MspDeInit:00000028 $d
      /tmp/cc2F8HMm.s:281    .bss.huart2:00000000 $d
+=======
+     /tmp/ccire4jk.s:21     .text.MX_USART2_UART_Init:00000000 $t
+     /tmp/ccire4jk.s:27     .text.MX_USART2_UART_Init:00000000 MX_USART2_UART_Init
+     /tmp/ccire4jk.s:85     .text.MX_USART2_UART_Init:0000002c $d
+     /tmp/ccire4jk.s:284    .bss.huart2:00000000 huart2
+     /tmp/ccire4jk.s:91     .text.HAL_UART_MspInit:00000000 $t
+     /tmp/ccire4jk.s:97     .text.HAL_UART_MspInit:00000000 HAL_UART_MspInit
+     /tmp/ccire4jk.s:214    .text.HAL_UART_MspInit:00000074 $d
+     /tmp/ccire4jk.s:220    .text.HAL_UART_MspDeInit:00000000 $t
+     /tmp/ccire4jk.s:226    .text.HAL_UART_MspDeInit:00000000 HAL_UART_MspDeInit
+     /tmp/ccire4jk.s:273    .text.HAL_UART_MspDeInit:00000028 $d
+     /tmp/ccire4jk.s:281    .bss.huart2:00000000 $d
+>>>>>>> Correction
 
 UNDEFINED SYMBOLS
 HAL_UART_Init

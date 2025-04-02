@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 1
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 1
+>>>>>>> Correction
 
 
    1              		.cpu cortex-m4
@@ -58,7 +62,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
   27:Src/tim.c     **** TIM_HandleTypeDef htim1;
   28:Src/tim.c     **** TIM_HandleTypeDef htim3;
   29:Src/tim.c     **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 2
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 2
+>>>>>>> Correction
 
 
   30:Src/tim.c     **** /* TIM1 init function */
@@ -118,7 +126,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
   84:Src/tim.c     ****   /* USER CODE BEGIN TIM1_Init 2 */
   85:Src/tim.c     **** 
   86:Src/tim.c     ****   /* USER CODE END TIM1_Init 2 */
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 3
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 3
+>>>>>>> Correction
 
 
   87:Src/tim.c     ****   HAL_TIM_MspPostInit(&htim1);
@@ -178,7 +190,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
   34              		@ link register save eliminated.
   35              		.loc 1 136 1 is_stmt 0 view .LVU1
   36 0000 82B0     		sub	sp, sp, #8
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 4
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 4
+>>>>>>> Correction
 
 
   37              	.LCFI0:
@@ -238,7 +254,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
   65 0014 0023     		movs	r3, #0
   66 0016 0093     		str	r3, [sp]
  144:Src/tim.c     ****   /* USER CODE BEGIN TIM1_MspInit 1 */
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 5
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 5
+>>>>>>> Correction
 
 
   67              		.loc 1 144 5 view .LVU10
@@ -298,7 +318,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  113              		.global	HAL_TIM_MspPostInit
  114              		.syntax unified
  115              		.thumb
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 6
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 6
+>>>>>>> Correction
 
 
  116              		.thumb_func
@@ -358,7 +382,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  184:Src/tim.c     ****   }
  185:Src/tim.c     ****   else if(timHandle->Instance==TIM3)
  148              		.loc 1 185 8 is_stmt 1 view .LVU28
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 7
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 7
+>>>>>>> Correction
 
 
  149              		.loc 1 185 10 is_stmt 0 view .LVU29
@@ -418,7 +446,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  177 0032 1B6B     		ldr	r3, [r3, #48]
  178 0034 03F01003 		and	r3, r3, #16
  179 0038 0193     		str	r3, [sp, #4]
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 8
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 8
+>>>>>>> Correction
 
 
  170:Src/tim.c     ****     /**TIM1 GPIO Configuration
@@ -478,7 +510,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  218              		.loc 1 191 5 view .LVU50
  219 0062 1B6B     		ldr	r3, [r3, #48]
  220 0064 03F00103 		and	r3, r3, #1
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 9
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 9
+>>>>>>> Correction
 
 
  221 0068 0293     		str	r3, [sp, #8]
@@ -538,7 +574,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  264              		.thumb_func
  266              	MX_TIM1_Init:
  267              	.LFB134:
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 10
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 10
+>>>>>>> Correction
 
 
   32:Src/tim.c     **** 
@@ -598,7 +638,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  310              		.loc 1 47 3 is_stmt 1 view .LVU75
   47:Src/tim.c     ****   htim1.Init.Period = 25000;
  311              		.loc 1 47 26 is_stmt 0 view .LVU76
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 11
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 11
+>>>>>>> Correction
 
 
  312 002c 8460     		str	r4, [r0, #8]
@@ -658,7 +702,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  348 0050 28BB     		cbnz	r0, .L24
  349              	.L19:
   62:Src/tim.c     ****   sConfigOC.Pulse = 1;
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 12
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 12
+>>>>>>> Correction
 
 
  350              		.loc 1 62 3 is_stmt 1 view .LVU95
@@ -718,7 +766,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  386 0072 0193     		str	r3, [sp, #4]
   74:Src/tim.c     ****   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
  387              		.loc 1 74 3 is_stmt 1 view .LVU114
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 13
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 13
+>>>>>>> Correction
 
 
   74:Src/tim.c     ****   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
@@ -778,7 +830,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  426              	.L23:
  427              	.LCFI10:
  428              		.cfi_restore_state
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 14
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 14
+>>>>>>> Correction
 
 
   54:Src/tim.c     ****   }
@@ -838,7 +894,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  478 0004 0023     		movs	r3, #0
  479 0006 0893     		str	r3, [sp, #32]
  480 0008 0993     		str	r3, [sp, #36]
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 15
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 15
+>>>>>>> Correction
 
 
   99:Src/tim.c     **** 
@@ -898,7 +958,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  518              	.L30:
  114:Src/tim.c     ****   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
  519              		.loc 1 114 3 is_stmt 1 view .LVU155
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 16
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 16
+>>>>>>> Correction
 
 
  114:Src/tim.c     ****   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
@@ -958,7 +1022,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  557 005a 58B9     		cbnz	r0, .L36
  558              	.L32:
  131:Src/tim.c     **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 17
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 17
+>>>>>>> Correction
 
 
  559              		.loc 1 131 3 is_stmt 1 view .LVU173
@@ -1018,7 +1086,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  608              		@ frame_needed = 0, uses_anonymous_args = 0
  609              		@ link register save eliminated.
  211:Src/tim.c     **** 
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 18
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 18
+>>>>>>> Correction
 
 
  212:Src/tim.c     ****   if(tim_pwmHandle->Instance==TIM1)
@@ -1078,7 +1150,11 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  639 002a F0E7     		b	.L39
  640              	.L45:
  641              		.align	2
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 19
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 19
+>>>>>>> Correction
 
 
  642              	.L44:
@@ -1116,11 +1192,16 @@ ARM GAS  /tmp/cc7loQeh.s 			page 1
  671              		.file 9 "Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h"
  672              		.file 10 "Inc/main.h"
  673              		.file 11 "<built-in>"
+<<<<<<< HEAD
 ARM GAS  /tmp/cc7loQeh.s 			page 20
+=======
+ARM GAS  /tmp/ccZ6byEj.s 			page 20
+>>>>>>> Correction
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 tim.c
+<<<<<<< HEAD
      /tmp/cc7loQeh.s:21     .text.HAL_TIM_PWM_MspInit:00000000 $t
      /tmp/cc7loQeh.s:27     .text.HAL_TIM_PWM_MspInit:00000000 HAL_TIM_PWM_MspInit
      /tmp/cc7loQeh.s:105    .text.HAL_TIM_PWM_MspInit:00000048 $d
@@ -1140,6 +1221,27 @@ DEFINED SYMBOLS
      /tmp/cc7loQeh.s:643    .text.HAL_TIM_PWM_MspDeInit:0000002c $d
      /tmp/cc7loQeh.s:650    .bss.htim3:00000000 $d
      /tmp/cc7loQeh.s:657    .bss.htim1:00000000 $d
+=======
+     /tmp/ccZ6byEj.s:21     .text.HAL_TIM_PWM_MspInit:00000000 $t
+     /tmp/ccZ6byEj.s:27     .text.HAL_TIM_PWM_MspInit:00000000 HAL_TIM_PWM_MspInit
+     /tmp/ccZ6byEj.s:105    .text.HAL_TIM_PWM_MspInit:00000048 $d
+     /tmp/ccZ6byEj.s:112    .text.HAL_TIM_MspPostInit:00000000 $t
+     /tmp/ccZ6byEj.s:118    .text.HAL_TIM_MspPostInit:00000000 HAL_TIM_MspPostInit
+     /tmp/ccZ6byEj.s:251    .text.HAL_TIM_MspPostInit:00000080 $d
+     /tmp/ccZ6byEj.s:260    .text.MX_TIM1_Init:00000000 $t
+     /tmp/ccZ6byEj.s:266    .text.MX_TIM1_Init:00000000 MX_TIM1_Init
+     /tmp/ccZ6byEj.s:451    .text.MX_TIM1_Init:000000b0 $d
+     /tmp/ccZ6byEj.s:660    .bss.htim1:00000000 htim1
+     /tmp/ccZ6byEj.s:457    .text.MX_TIM3_Init:00000000 $t
+     /tmp/ccZ6byEj.s:463    .text.MX_TIM3_Init:00000000 MX_TIM3_Init
+     /tmp/ccZ6byEj.s:590    .text.MX_TIM3_Init:0000007c $d
+     /tmp/ccZ6byEj.s:653    .bss.htim3:00000000 htim3
+     /tmp/ccZ6byEj.s:596    .text.HAL_TIM_PWM_MspDeInit:00000000 $t
+     /tmp/ccZ6byEj.s:602    .text.HAL_TIM_PWM_MspDeInit:00000000 HAL_TIM_PWM_MspDeInit
+     /tmp/ccZ6byEj.s:643    .text.HAL_TIM_PWM_MspDeInit:0000002c $d
+     /tmp/ccZ6byEj.s:650    .bss.htim3:00000000 $d
+     /tmp/ccZ6byEj.s:657    .bss.htim1:00000000 $d
+>>>>>>> Correction
 
 UNDEFINED SYMBOLS
 HAL_GPIO_Init
