@@ -23,6 +23,7 @@
 #include "usb_otg.h"
 #include "../Inc/gpio.h"
 #include "../Inc/usb_otg.h"
+#include "SR04.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -132,10 +133,20 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   MX_USB_OTG_FS_PCD_Init();
+  MX_TIM2_Init();
+
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_Base_Start(&htim2);
+
+  // Initialiser le capteur SR04
+  SR04_Init();
+
+  char uart_buffer[50];
+  uint32_t distance;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -172,6 +183,15 @@ int main(void)
           // Réinitialiser le buffer
           memset(rx_buffer, 0, sizeof(rx_buffer));
       }
+
+      // Obtenir la distance
+      distance = SR04_GetDistance();
+
+      // Envoyer la distance via UART
+      snprintf(uart_buffer, sizeof(uart_buffer), "Distance: %lu cm\r\n", distance);
+      HAL_UART_Transmit(&huart2, (uint8_t *)uart_buffer, strlen(uart_buffer), HAL_MAX_DELAY);
+
+      HAL_Delay(500); // Attendre 500 ms
   }
     /* USER CODE END WHILE */
 
