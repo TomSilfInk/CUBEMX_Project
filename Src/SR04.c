@@ -30,13 +30,13 @@ uint32_t SR04_GetDistance(void) {
     while (HAL_GPIO_ReadPin(SR04_ECHO_PORT, SR04_ECHO_PIN) == GPIO_PIN_RESET);
 
     // Démarrer le timer
-    start_time = __HAL_TIM_GET_COUNTER(&htim2);
+    start_time = __HAL_TIM_GET_COUNTER(&htim3);
 
     // Attendre que le signal Echo passe à LOW
     while (HAL_GPIO_ReadPin(SR04_ECHO_PORT, SR04_ECHO_PIN) == GPIO_PIN_SET);
 
     // Arrêter le timer
-    stop_time = __HAL_TIM_GET_COUNTER(&htim2);
+    stop_time = __HAL_TIM_GET_COUNTER(&htim3);
 
     // Calculer la durée du signal Echo
     uint32_t time_elapsed = stop_time - start_time;

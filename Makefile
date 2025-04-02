@@ -62,7 +62,8 @@ Src/system_stm32f4xx.c \
 Src/usb_otg.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c \
-Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c
+Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c \
+Src/SR04.c  # Ajout de SR04.c ici
 
 # ASM sources
 ASM_SOURCES =  \
