@@ -10,12 +10,42 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
-#include "usart.h"
 #include "gpio.h"
-#include <string.h> // Pour utiliser strlen()
+#include "motor.h"
+#include "usart.h" // Pour accéder aux fonctions UART
+
+/* Private includes ----------------------------------------------------------*/
+#include <stdio.h>
+#include <string.h>
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -23,21 +53,27 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-  /* MCU Configuration--------------------------------------------------------*/
+    /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /* Configure the system clock */
-  SystemClock_Config();
+    /* Configure the system clock */
+    SystemClock_Config();
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
+    /* Initialize all configured peripherals */
+    MX_GPIO_Init();
+    MX_TIM3_Init();
+
+    /* Initialiser le moteur */
+    Motor_Init();
 
   /* Infinite loop */
   while (1)
   {
+
+    // Lancement du moteur 
+    Motor_Sweep();
     // Envoyer "Hello, World!" via UART
     HAL_UART_Transmit(&huart2, (uint8_t *)"Hello, World!\r\n", strlen("Hello, World!\r\n"), HAL_MAX_DELAY);
 
