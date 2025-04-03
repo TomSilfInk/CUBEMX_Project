@@ -99,11 +99,8 @@ int main(void)
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
     /* USER CODE END WHILE */
-
+    void Motor_Sweep(void);
     /* USER CODE BEGIN 3 */
-    /*Blink_LEDs();
-    Send_UART_Message();
-    HAL_Delay(500); // Pause de 500ms entre chaque cycle*/
     Blink_LEDs();
     HAL_Delay(50); // Rafraîchir toutes les 500ms
   }
