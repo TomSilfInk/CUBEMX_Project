@@ -82,18 +82,26 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-
+  SR04_Init(); // Initialize the SR04 sensor
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    uint32_t distance = SR04_GetDistance();
+    char msg[50];
+    sprintf(msg, "Distance: %lu cm\r\n", distance);
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
     /* USER CODE END WHILE */
-    Blink_LEDs();
-    Send_UART_Message();
-    HAL_Delay(500); // Pause de 500ms entre chaque cycle
+
     /* USER CODE BEGIN 3 */
+    /*Blink_LEDs();
+    Send_UART_Message();
+    HAL_Delay(500); // Pause de 500ms entre chaque cycle*/
+    Blink_LEDs();
+    HAL_Delay(50); // Rafraîchir toutes les 500ms
   }
   /* USER CODE END 3 */
 }
