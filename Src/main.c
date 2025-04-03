@@ -11,6 +11,9 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+#include "SR04.h"
+#include "motor.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -83,6 +86,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   SR04_Init(); // Initialize the SR04 sensor
+  Motor_Init(); // Initialize the motor
   /* USER CODE END 2 */
 
   /* Infinite loop */
