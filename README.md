@@ -7,14 +7,14 @@ Ce projet utilise un microcontrôleur STM32F407VGTx pour interfacer un capteur d
 
 ### Broches principales utilisées dans le projet
 
-| Broche | Fonction | Description |
+| Broche | Fonction  | Description |
 |--------|----------|-------------|
-| PD12   | ECHO     | Entrée du signal ECHO du capteur HC-SR04 |
 | PD13   | BUTTON   | Bouton-poussoir pour changer de mode |
 | PD14   | LED_BLUE | LED bleue (allumée en mode 1) |
 | PD15   | LED_GREEN| LED verte (allumée en mode 2) |
-| PA0    | TIM2_CH1 | Canal 1 du Timer 2 (PWM du servo-moteur) |
-| PA1    | TIM2_CH2 | Canal 2 du Timer 2 (utilisé pour le signal TRIG du HC-SR04) |
+| PA0    | TRIG     | Signal TRIG du capteur HC-SR04 |
+| PA5    | TIM2_CH2 | Canal 2 du Timer 2 - SR04|
+| PA6    | TIM3_CH3 | Canal 3 du Timer 3 - Servo moteur|
 | PA2    | USART2_TX| Transmission de données série |
 | PA3    | USART2_RX| Réception de données série |
 

@@ -3,6 +3,7 @@
 
 #include "main.h"
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 /**
  * @brief Initialise le moteur (servo-moteur).
@@ -22,6 +23,10 @@ void Motor_SetPosition(int angle);
 void Motor_Init(void);
 void Motor_SetPosition(int angle);
 >>>>>>> Correction
+=======
+void Motor_Init(void);
+void Motor_SetPosition(int angle);
+>>>>>>> f6d5b62d867fac1ec06c554a7e4a381785e19f46
 void Motor_Sweep(void);
 
 #endif // MOTOR_H
