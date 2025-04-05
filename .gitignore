@@ -1,0 +1,11 @@
+# Ignorer les fichiers générés par la compilation
+*.o
+*.d
+*.lst
+*.elf
+*.map
+*.bin
+*.hex
+
+# Ignorer le dossier de build (si applicable)
+build/

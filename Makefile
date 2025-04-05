@@ -59,9 +59,8 @@ Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c \
 Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c \
 Src/system_stm32f4xx.c \
-Src/system_stm32f4xx.c \
-Src/SR04.c \
-Src/motor.c
+Src/motor.c\
+Src/SR04.c  # Ajout de SR04.c ici
 
 # ASM sources
 ASM_SOURCES =  \

@@ -9,6 +9,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
+#include "usart.h"
 #include "gpio.h"
 #include "SR04.h"
 #include "motor.h"
@@ -88,8 +89,6 @@ int main(void)
   Motor_Init(); // Initialize the motor
   /* USER CODE END 2 */
 
-  //Initialisation du moteur
-  Motor_Init();
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
