@@ -1,7 +1,9 @@
 #include "SR04.h"
 #include "stm32f4xx_hal.h"
 #include "tim.h"
-
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 void SR04_Init(void) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 

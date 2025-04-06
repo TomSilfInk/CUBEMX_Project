@@ -30,5 +30,4 @@ void Motor_Sweep(void)
     }
 
     Motor_SetPosition(angle);
-    HAL_Delay(20);
 }

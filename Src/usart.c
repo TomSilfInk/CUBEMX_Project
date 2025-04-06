@@ -19,7 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -112,6 +113,48 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 
   /* USER CODE END USART2_MspDeInit 1 */
   }
+}
+
+// Dans main.c ou dans un fichier séparé si vous préférez
+void UART_Test(void) {
+    static uint8_t first_run = 1; // Variable pour vérifier si c'est la première exécution
+
+    if (first_run) {
+        // Afficher le message initial une seule fois
+        char msg[] = "Test UART: Entrez une commande\r\n";
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        first_run = 0; // Ne plus afficher ce message
+    }
+
+    // Buffer pour recevoir les données
+    uint8_t rx_buffer[50] = {0}; // Taille augmentée pour des messages plus longs
+    uint8_t rx_index = 0;        // Index pour suivre la position dans le buffer
+    uint8_t received_char;       // Variable pour stocker chaque caractère reçu
+
+    // Lire les caractères un par un jusqu'à détecter "Entrée" (\n ou \r)
+    while (1) {
+        HAL_UART_Receive(&huart2, &received_char, 1, HAL_MAX_DELAY); // Attendre un caractère
+
+        // Si "Entrée" est détecté, terminer la réception
+        if (received_char == '\n' || received_char == '\r') {
+            rx_buffer[rx_index] = '\0'; // Ajouter un caractère de fin de chaîne
+            break;
+        }
+
+        // Ajouter le caractère au buffer si la taille maximale n'est pas atteinte
+        if (rx_index < sizeof(rx_buffer) - 1) {
+            rx_buffer[rx_index++] = received_char;
+        }
+    }
+
+    // Afficher le message reçu
+    char echo_msg[100];
+    sprintf(echo_msg, "Message reçu : %s\r\n", rx_buffer);
+    HAL_UART_Transmit(&huart2, (uint8_t*)echo_msg, strlen(echo_msg), HAL_MAX_DELAY);
+
+    // Réafficher le message initial pour recommencer
+    char msg[] = "Test UART: Entrez une commande\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 }
 
 /* USER CODE BEGIN 1 */

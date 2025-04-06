@@ -37,7 +37,7 @@ extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
-
+void UART_Test(void);
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
