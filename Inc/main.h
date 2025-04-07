@@ -59,8 +59,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define TRIG_Pin GPIO_PIN_1
 #define TRIG_GPIO_Port GPIOA
-#define LED_GREEN_Pin GPIO_PIN_12
-#define LED_GREEN_GPIO_Port GPIOD
 #define BUTTON_Pin GPIO_PIN_13
 #define BUTTON_GPIO_Port GPIOD
 #define LED_GREEN_Pin GPIO_PIN_12
