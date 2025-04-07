@@ -10,7 +10,6 @@
   
   #include "main.h"
   #include "stm32f4xx_hal.h"
-  #include "motor.h"
   #include "SR04.h"
   #include "usart.h"
   
@@ -32,8 +31,15 @@
   } MotorEvent;
   
   /* Fonctions publiques */
+
+  // Initialisation du moteur
+  void Motor_Init(void);
+
   // Initialisation de la machine à états
   void MotorControl_Init(void);
+
+  // Fonction de mise à jour du moteur
+  void Motor_SetPosition(int angle);
   
   // Mise à jour du contrôleur
   void MotorControl_Update(void);
@@ -46,5 +52,8 @@
   
   // Obtenir l'état courant
   MotorState MotorControl_GetState(void);
+
+  // Fonction de test
+  void Motor_Test(void);
   
   #endif /* MOTOR_CONTROL_H */

@@ -6,10 +6,10 @@
   */
 
   #include "motor_control.h"
-  #include "motor.h"
   #include "SR04.h"
   #include "gpio.h"
   #include "usart.h"
+  #include "tim.h"
   #include <stdio.h>
   #include <string.h>
   
@@ -59,6 +59,12 @@
   
   /* Implémentation des fonctions publiques */
   
+  // Initialisation du moteur
+  void Motor_Init(void)
+  {
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  }
+
   void MotorControl_Init(void) {
     // Initialisation de l'état
     currentState = S_INIT;
@@ -69,6 +75,18 @@
     // Initialiser les LEDs pour indiquer le mode
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);    // LED bleue pour mode distance
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
+  }
+
+  // Fonction pour positionner le moteur
+  void Motor_SetPosition(int angle)
+  {
+    if (angle < 0)
+        angle = 0;
+    if (angle > 180)
+        angle = 180;
+
+    uint16_t pulse_width = 5 + (angle * 2) / 45;
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
   }
   
   void MotorControl_Update(void) {
@@ -235,3 +253,18 @@
       HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
   }
+
+  void Motor_Test(void)
+{
+    static int angle = 0;
+    static int direction = 1;
+
+    angle += direction;
+
+    if (angle >= 180 || angle <= 0)
+    {
+        direction = -direction;
+    }
+
+    Motor_SetPosition(angle);
+}

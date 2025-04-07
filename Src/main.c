@@ -12,7 +12,6 @@
 #include "usart.h"
 #include "gpio.h"
 #include "SR04.h"
-#include "motor.h"
 #include "motor_control.h"  // Nouveau: inclusion du contrôleur moteur
 #include <stdio.h>
 #include <string.h>
