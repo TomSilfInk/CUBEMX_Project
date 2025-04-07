@@ -68,7 +68,7 @@
     
     // Initialiser les LEDs pour indiquer le mode
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);    // LED bleue pour mode distance
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // LED verte éteinte
+    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
   }
   
   void MotorControl_Update(void) {
@@ -142,7 +142,7 @@
       case A_SET_DISTANCE_MODE:
         // Activer le mode distance
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);    // LED bleue allumée
-        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // LED verte éteinte
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
         
         // Message de confirmation court
         char msg1[] = "Mode: DISTANCE\r\n";
@@ -151,7 +151,7 @@
       
       case A_SET_UART_MODE:
         // Activer le mode UART
-        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);    // LED verte allumée
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);    // LED verte allumée
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // LED bleue éteinte
         
         // Positionner le moteur à la dernière valeur UART connue
@@ -165,7 +165,7 @@
       
       case A_STOP:
         // Arrêter le système
-        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // Éteindre LED verte
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // Éteindre LED verte
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // Éteindre LED bleue
         break;
       

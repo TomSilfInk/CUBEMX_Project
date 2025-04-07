@@ -118,23 +118,8 @@ int main(void)
   /*Infinite loop*/
   while (1)
   {
-    /* // Tests singletons du moteur    
-    //  UART    
-    UART_Test();     
-    HAL_Delay(500);  
-    
-    // Moteur
-    Motor_Sweep();        
 
-    // SR04 par affichage sur l'UART    
-    uint32_t distance = SR04_GetDistance();    
-    char msg[50];    
-    sprintf(msg, "Distance: %lu cm\r\n", distance);    
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);  
-
-    // Allumage des LEDs    
-    Blink_LEDs();
- */
+    /*Test des singletons*/
     // Vérifier l'état du bouton poussoir
     Check_Button();
     
