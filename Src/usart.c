@@ -19,9 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-#include <stdio.h>
 #include <string.h>
-#include "gpio.h"
+#include <stdio.h>
 /* USER CODE BEGIN 0 */
 extern uint8_t rxData;
 /* USER CODE END 0 */
@@ -116,11 +115,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
   }
 }
 
-/**
-  * @brief  Fonction de test de l'UART avec écho
-  * @retval None
-  */
- /* USER CODE BEGIN 1 */
+/* USER CODE BEGIN 1 */
 /**
   * @brief  Fonction de test de l'UART avec écho
   * @retval None
@@ -196,7 +191,4 @@ void UART_Test(void)
   // Redémarrer la réception par interruption
   HAL_UART_Receive_IT(&huart2, (uint8_t*)&rxData, 1);
 }
-/* USER CODE END 1 */
-/* USER CODE BEGIN 1 */
-
 /* USER CODE END 1 */

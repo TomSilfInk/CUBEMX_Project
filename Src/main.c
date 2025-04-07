@@ -64,14 +64,12 @@ uint32_t lastButtonCheck = 0;           // Pour le debounce du bouton
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+/* USER CODE BEGIN PFP */
 void Blink_LEDs(void);
 void Send_UART_Message(void);
 void Check_Button(void);
 void Process_UART_Command(void);
 void Error_Handler(void);
-
-/* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -83,60 +81,55 @@ void Error_Handler(void);
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_TIM3_Init();
-  MX_TIM2_Init();
-  
-  /* Initialisation du capteur, du moteur et du contrôleur */
-  SR04_Init();         // Initialiser le capteur SR04
-  Motor_Init();        // Initialiser le moteur
-  MotorControl_Init(); // Initialiser le contrôleur moteur
-  
-  /* Configuration de la réception UART par interruption */
-  HAL_UART_Receive_IT(&huart2, &rxData, 1);
-  
-  /* Message d'accueil */
-  char welcome[] = "\r\n=== Projet STM32 - Controle de servo ===\r\n"
-                   "Mode 1: Capteur SR04 -> bouton poussoir\r\n"
-                   "Mode 2: Commande UART -> entrer angle (0-180)\r\n";
-  HAL_UART_Transmit(&huart2, (uint8_t*)welcome, strlen(welcome), HAL_MAX_DELAY);
-
-  /*Infinite loop*/
-  while (1)
-  {
-
-    /*Test des singletons*/
-    UART_Test();
-    // Vérifier l'état du bouton poussoir
-    /* Check_Button();
-    
-    // Traiter les commandes UART reçues
-    if (rxComplete) {
-      Process_UART_Command();
-      rxComplete = 0;
-    }
-    
-    // Mettre à jour le contrôleur moteur
-    MotorControl_Update();
-    
-    // Délai pour ne pas surcharger le CPU
-    HAL_Delay(20); */
-  }
-  /* USER CODE END 3 */
-}
+ int main(void)
+ {
+   /* MCU Configuration--------------------------------------------------------*/
+   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+   HAL_Init();
+ 
+   /* Configure the system clock */
+   SystemClock_Config();
+ 
+   /* Initialize all configured peripherals */
+   MX_GPIO_Init();
+   MX_USART2_UART_Init();
+   MX_TIM3_Init();
+   MX_TIM2_Init();
+   
+   /* Initialisation du capteur, du moteur et du contrôleur */
+   SR04_Init();         // Initialiser le capteur SR04
+   Motor_Init();        // Initialiser le moteur
+   MotorControl_Init(); // Initialiser le contrôleur moteur
+   
+   /* Configuration de la réception UART par interruption */
+   HAL_UART_Receive_IT(&huart2, &rxData, 1);
+   
+   /* Message d'accueil */
+   char welcome[] = "\r\n=== Projet STM32 - Controle de servo ===\r\n"
+                    "Mode 1: Capteur SR04 -> bouton poussoir\r\n"
+                    "Mode 2: Commande UART -> entrer angle (0-180)\r\n"
+                    "Mode 3: TEST -> tous les modules actifs\r\n";
+   HAL_UART_Transmit(&huart2, (uint8_t*)welcome, strlen(welcome), HAL_MAX_DELAY);
+ 
+   /*Infinite loop*/
+   while (1)
+   {
+     // Vérifier l'état du bouton poussoir
+     Check_Button();
+     
+     // Traiter les commandes UART reçues
+     if (rxComplete) {
+       Process_UART_Command();
+       rxComplete = 0;
+     }
+     
+     // Mettre à jour le contrôleur moteur
+     MotorControl_Update();
+     
+     // Délai pour ne pas surcharger le CPU
+     HAL_Delay(20);
+   }
+ }
 
 /**
   * @brief System Clock Configuration
@@ -147,11 +140,14 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage */
+  /** Configure the main internal regulator output voltage
+  */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters */
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -166,7 +162,8 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  /** Initializes the CPU, AHB and APB buses clocks */
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
@@ -218,13 +215,40 @@ void Check_Button(void)
   }
 }
 
-// Nouvelle fonction: Traiter les commandes UART reçues
 void Process_UART_Command(void)
 {
-  // Traitement prioritaire - exécuter immédiatement
-  
   // Terminer la chaîne de caractères
   rxBuffer[rxIndex] = '\0';
+  
+  // Vérifier si nous sommes en mode test
+  if (MotorControl_GetState() == S_MODE_TEST) {
+    // Commande 'q': quitter le mode test
+    if (rxIndex == 1 && rxBuffer[0] == 'q') {
+      MotorControl_ButtonPressed(); // Simuler un appui sur le bouton pour retourner au mode DISTANCE
+      rxIndex = 0;
+      return;
+    }
+    
+    // Commandes '1'-'3': changer l'angle du moteur
+    if (rxIndex == 1 && rxBuffer[0] >= '1' && rxBuffer[0] <= '3') {
+      int angle = (rxBuffer[0] - '0') * 60; // 1->60°, 2->120°, 3->180°
+      Motor_SetPosition(angle);
+      
+      char msg[50];
+      sprintf(msg, "Position moteur fixée à %d degrés\r\n", angle);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+      
+      rxIndex = 0;
+      return;
+    }
+    
+    // En mode TEST, traiter toute autre entrée comme un écho simple
+    char echo_msg[100];
+    sprintf(echo_msg, "Echo (mode TEST): %s\r\n", rxBuffer);
+    HAL_UART_Transmit(&huart2, (uint8_t*)echo_msg, strlen(echo_msg), 100);
+    rxIndex = 0;
+    return;
+  }
   
   // Convertir la chaîne en nombre (en évitant atoi qui peut être lent)
   int angle = 0;
