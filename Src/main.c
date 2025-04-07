@@ -215,11 +215,8 @@ void Check_Button(void)
   }
 }
 
-// Nouvelle fonction: Traiter les commandes UART reçues
 void Process_UART_Command(void)
 {
-  // Traitement prioritaire - exécuter immédiatement
-  
   // Terminer la chaîne de caractères
   rxBuffer[rxIndex] = '\0';
   
@@ -244,6 +241,13 @@ void Process_UART_Command(void)
       rxIndex = 0;
       return;
     }
+    
+    // En mode TEST, traiter toute autre entrée comme un écho simple
+    char echo_msg[100];
+    sprintf(echo_msg, "Echo (mode TEST): %s\r\n", rxBuffer);
+    HAL_UART_Transmit(&huart2, (uint8_t*)echo_msg, strlen(echo_msg), 100);
+    rxIndex = 0;
+    return;
   }
   
   // Convertir la chaîne en nombre (en évitant atoi qui peut être lent)

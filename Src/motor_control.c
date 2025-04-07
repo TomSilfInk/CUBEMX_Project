@@ -48,12 +48,12 @@
     [S_MODE_DISTANCE][E_STOP] = {S_DEATH, A_STOP},
     
     // État S_MODE_UART
-    [S_MODE_UART][E_BUTTON_PRESS] = {S_MODE_TEST, A_SET_TEST_MODE}, // Modifié: va vers le mode TEST
+    [S_MODE_UART][E_BUTTON_PRESS] = {S_MODE_TEST, A_SET_TEST_MODE},
     [S_MODE_UART][E_STOP] = {S_DEATH, A_STOP},
     
     // Nouvel état S_MODE_TEST
-    [S_MODE_TEST][E_BUTTON_PRESS] = {S_MODE_DISTANCE, A_SET_DISTANCE_MODE}, // Boucle vers le mode DISTANCE
-    [S_MODE_TEST][E_UART_COMMAND] = {S_MODE_UART, A_SET_UART_MODE},
+    [S_MODE_TEST][E_BUTTON_PRESS] = {S_MODE_DISTANCE, A_SET_DISTANCE_MODE},
+    [S_MODE_TEST][E_UART_COMMAND] = {S_MODE_TEST, A_NOP}, // Modifié: reste en mode TEST
     [S_MODE_TEST][E_STOP] = {S_DEATH, A_STOP}
   };
   
@@ -148,8 +148,8 @@
     // Mettre à jour immédiatement la position du moteur
     Motor_SetPosition(uartAngle);
     
-    // Si nous ne sommes pas déjà en mode UART, changer de mode
-    if (currentState != S_MODE_UART) {
+    // Si nous sommes en mode DISTANCE, changer de mode
+    if (currentState == S_MODE_DISTANCE) {
       MotorControl_ProcessEvent(E_UART_COMMAND);
     } 
     // Sinon, envoyer juste la confirmation
