@@ -40,8 +40,8 @@ Le schéma fonctionnel du système comprend :
 | Broche | Fonction | Description |
 |--------|----------|-------------|
 | PD13 | BUTTON | Bouton-poussoir pour changer de mode |
-| PD14 | LED_BLUE | LED bleue (allumée en mode 1) |
-| PD15 | LED_GREEN| LED verte (allumée en mode 2) |
+| PD15 | LED_BLUE | LED bleue (allumée en mode 1) |
+| PD12 | LED_GREEN| LED verte (allumée en mode 2) |
 | PA1 | TRIG | Signal TRIG du capteur HC-SR04 |
 | PA5 | TIM2_CH2 | Canal 2 du Timer 2 - SR04|
 | PA6 | TIM3_CH3 | Canal 3 du Timer 3 - Servo moteur|
