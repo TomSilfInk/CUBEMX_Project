@@ -18,6 +18,7 @@
     A_NOP = 0,              // Pas d'action
     A_SET_DISTANCE_MODE,    // Activer le mode distance
     A_SET_UART_MODE,        // Activer le mode UART
+    A_SET_TEST_MODE,        // Nouvelle action: activer le mode test
     A_UPDATE_MOTOR,         // Mettre à jour la position du moteur
     A_STOP                  // Arrêter le système
   } MotorAction;
@@ -47,8 +48,13 @@
     [S_MODE_DISTANCE][E_STOP] = {S_DEATH, A_STOP},
     
     // État S_MODE_UART
-    [S_MODE_UART][E_BUTTON_PRESS] = {S_MODE_DISTANCE, A_SET_DISTANCE_MODE},
-    [S_MODE_UART][E_STOP] = {S_DEATH, A_STOP}
+    [S_MODE_UART][E_BUTTON_PRESS] = {S_MODE_TEST, A_SET_TEST_MODE}, // Modifié: va vers le mode TEST
+    [S_MODE_UART][E_STOP] = {S_DEATH, A_STOP},
+    
+    // Nouvel état S_MODE_TEST
+    [S_MODE_TEST][E_BUTTON_PRESS] = {S_MODE_DISTANCE, A_SET_DISTANCE_MODE}, // Boucle vers le mode DISTANCE
+    [S_MODE_TEST][E_UART_COMMAND] = {S_MODE_UART, A_SET_UART_MODE},
+    [S_MODE_TEST][E_STOP] = {S_DEATH, A_STOP}
   };
   
   /* Prototypes des fonctions privées */
@@ -56,6 +62,7 @@
   static void MotorControl_ProcessEvent(MotorEvent event);
   static void MotorControl_HandleDistanceMode(void);
   static void MotorControl_HandleUartMode(void);
+  static void MotorControl_HandleTestMode(void); // Nouveau prototype
   
   /* Implémentation des fonctions publiques */
   
@@ -64,7 +71,7 @@
   {
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   }
-
+  
   void MotorControl_Init(void) {
     // Initialisation de l'état
     currentState = S_INIT;
@@ -76,7 +83,7 @@
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);    // LED bleue pour mode distance
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
   }
-
+  
   // Fonction pour positionner le moteur
   void Motor_SetPosition(int angle)
   {
@@ -84,7 +91,7 @@
         angle = 0;
     if (angle > 180)
         angle = 180;
-
+  
     uint16_t pulse_width = 5 + (angle * 2) / 45;
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
   }
@@ -98,6 +105,10 @@
       
       case S_MODE_UART:
         MotorControl_HandleUartMode();
+        break;
+      
+      case S_MODE_TEST:
+        MotorControl_HandleTestMode(); // Nouveau gestionnaire pour le mode test
         break;
       
       default:
@@ -117,7 +128,8 @@
       // Message de changement de mode
       char msg[50];
       sprintf(msg, "Changement de mode: %s\r\n", 
-              (currentState == S_MODE_DISTANCE) ? "DISTANCE" : "UART");
+              (currentState == S_MODE_DISTANCE) ? "DISTANCE" : 
+              (currentState == S_MODE_UART) ? "UART" : "TEST");
       HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
       
       // Réinitialiser le drapeau anti-rebond après un délai
@@ -161,6 +173,7 @@
         // Activer le mode distance
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);    // LED bleue allumée
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // LED orange éteinte
         
         // Message de confirmation court
         char msg1[] = "Mode: DISTANCE\r\n";
@@ -171,6 +184,7 @@
         // Activer le mode UART
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);    // LED verte allumée
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // LED bleue éteinte
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // LED orange éteinte
         
         // Positionner le moteur à la dernière valeur UART connue
         Motor_SetPosition(uartAngle);
@@ -180,11 +194,25 @@
         sprintf(msg2, "Mode: UART - Position: %d deg\r\n", uartAngle);
         HAL_UART_Transmit(&huart2, (uint8_t*)msg2, strlen(msg2), 100);
         break;
+        
+      case A_SET_TEST_MODE:
+        // Activer le mode TEST
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);    // LED orange allumée
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // LED verte éteinte
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // LED bleue éteinte
+        
+        // Message de confirmation court
+        char msg3[] = "Mode: TEST - Tous les modules actifs\r\n"
+                     "Le moteur tourne, la distance est mesurée et l'UART est actif\r\n"
+                     "Tapez 'q' pour quitter, '1'-'3' pour angles fixes\r\n";
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg3, strlen(msg3), 100);
+        break;
       
       case A_STOP:
         // Arrêter le système
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // Éteindre LED verte
         HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // Éteindre LED bleue
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_RESET);  // Éteindre LED orange
         break;
       
       default:
@@ -253,18 +281,39 @@
       HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
   }
-
-  void Motor_Test(void)
-{
-    static int angle = 0;
-    static int direction = 1;
-
-    angle += direction;
-
-    if (angle >= 180 || angle <= 0)
-    {
-        direction = -direction;
+  
+  // Nouvelle fonction pour gérer le mode test
+  static void MotorControl_HandleTestMode(void) {
+    // 1. Faire tourner le moteur (sweep)
+    Motor_Test();
+    
+    // 2. Lire et afficher la distance du capteur
+    uint32_t distance = SR04_GetDistance();
+    
+    // 3. Envoyer périodiquement les données via UART
+    uint32_t currentTime = HAL_GetTick();
+    if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
+      lastDistanceUpdate = currentTime;
+      
+      char msg[100];
+      sprintf(msg, "Mode TEST: Distance = %lu cm, Motor sweeping\r\n", distance);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
     }
-
-    Motor_SetPosition(angle);
-}
+    
+    // Note: La gestion des commandes UART se fait dans Process_UART_Command dans main.c
+  }
+  
+  void Motor_Test(void)
+  {
+      static int angle = 0;
+      static int direction = 1;
+  
+      angle += direction;
+  
+      if (angle >= 180 || angle <= 0)
+      {
+          direction = -direction;
+      }
+  
+      Motor_SetPosition(angle);
+  }

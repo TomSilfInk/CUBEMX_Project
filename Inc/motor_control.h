@@ -1,59 +1,41 @@
 /**
   ******************************************************************************
   * @file           : motor_control.h
-  * @brief          : Contrôleur du moteur avec machine à états
+  * @brief          : Header pour le contrôleur moteur
   ******************************************************************************
   */
 
   #ifndef MOTOR_CONTROL_H
   #define MOTOR_CONTROL_H
   
-  #include "main.h"
-  #include "stm32f4xx_hal.h"
-  #include "SR04.h"
-  #include "usart.h"
+  #include <stdint.h>
   
-  /* Définition des états possibles du système */
+  // Énumération des états
   typedef enum {
-    S_INIT = 0,             // État initial
-    S_MODE_DISTANCE,        // Mode contrôle par distance
-    S_MODE_UART,            // Mode contrôle par UART
-    S_DEATH,                // État d'arrêt
-    STATE_NB                // Nombre d'états
+    S_INIT = 0,        // État initial
+    S_MODE_DISTANCE,   // Mode distance
+    S_MODE_UART,       // Mode UART
+    S_MODE_TEST,       // Nouveau mode test
+    S_DEATH,           // État final
+    STATE_NB           // Nombre d'états
   } MotorState;
   
-  /* Définition des événements possibles */
+  // Énumération des événements
   typedef enum {
-    E_BUTTON_PRESS = 0,     // Appui sur le bouton poussoir
-    E_UART_COMMAND,         // Réception commande UART
-    E_STOP,                 // Arrêt du système
-    EVENT_NB                // Nombre d'événements
+    E_BUTTON_PRESS = 0,  // Appui sur bouton poussoir
+    E_UART_COMMAND,      // Commande UART reçue
+    E_STOP,              // Arrêt du système
+    EVENT_NB             // Nombre d'événements
   } MotorEvent;
   
-  /* Fonctions publiques */
-
-  // Initialisation du moteur
-  void Motor_Init(void);
-
-  // Initialisation de la machine à états
+  // Fonctions publiques
   void MotorControl_Init(void);
-
-  // Fonction de mise à jour du moteur
-  void Motor_SetPosition(int angle);
-  
-  // Mise à jour du contrôleur
   void MotorControl_Update(void);
-  
-  // Notification d'appui sur le bouton
   void MotorControl_ButtonPressed(void);
-  
-  // Commande UART reçue
   void MotorControl_SetUartAngle(uint8_t angle);
-  
-  // Obtenir l'état courant
   MotorState MotorControl_GetState(void);
-
-  // Fonction de test
+  void Motor_Init(void);
+  void Motor_SetPosition(int angle);
   void Motor_Test(void);
   
   #endif /* MOTOR_CONTROL_H */
