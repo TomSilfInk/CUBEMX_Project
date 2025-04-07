@@ -1,6 +1,8 @@
 #include "SR04.h"
 #include "stm32f4xx_hal.h"
 #include "tim.h"
+#include "gpio.h"
+#include "usart.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -58,12 +60,16 @@ uint32_t SR04_GetDistance(void) {
     // Calculer la durée du signal Echo
     uint32_t time_elapsed = stop_time - start_time;
 
-    // Logs pour le débogage
-    printf("Start: %lu, Stop: %lu, Elapsed: %lu\n", start_time, stop_time, time_elapsed);
-
     // Convertir la durée en distance (vitesse du son = 343 m/s)
     uint32_t distance = (uint32_t)(((float)time_elapsed * 0.0343f) / 2.0f);
 
     return distance;
 }
 
+void SR04_Test(void) {
+    // Fonction de test pour le capteur SR04
+    uint32_t distance = SR04_GetDistance();
+    char msg[50];
+    sprintf(msg, "Distance: %lu cm\r\n", distance);
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+}
