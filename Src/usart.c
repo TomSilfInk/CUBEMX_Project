@@ -19,9 +19,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-
+#include <stdio.h>
+#include <string.h>
+#include "gpio.h"
 /* USER CODE BEGIN 0 */
-
+extern uint8_t rxData;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart2;
@@ -114,6 +116,87 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
   }
 }
 
+/**
+  * @brief  Fonction de test de l'UART avec écho
+  * @retval None
+  */
+ /* USER CODE BEGIN 1 */
+/**
+  * @brief  Fonction de test de l'UART avec écho
+  * @retval None
+  */
+void UART_Test(void)
+{
+  // Variables locales pour le test UART
+  uint8_t test_buffer[64];
+  uint8_t test_char;
+  uint8_t test_idx = 0;
+  
+  // Message d'accueil
+  char welcome[] = "\r\n=== Test UART ===\r\n"
+                   "Entrez du texte et appuyez sur Entree. "
+                   "Entrez 'q' pour quitter.\r\n> ";
+  HAL_UART_Transmit(&huart2, (uint8_t*)welcome, strlen(welcome), HAL_MAX_DELAY);
+  
+  // Désactiver temporairement les interruptions UART existantes
+  __HAL_UART_DISABLE_IT(&huart2, UART_IT_RXNE);
+  
+  while(1)
+  {
+    // Réinitialiser l'index et le buffer
+    test_idx = 0;
+    memset(test_buffer, 0, sizeof(test_buffer));
+    
+    // Lire des caractères jusqu'à CR ou LF
+    while(1)
+    {
+      // Attendre qu'un caractère soit disponible (utilisation des registres directement)
+      while(__HAL_UART_GET_FLAG(&huart2, UART_FLAG_RXNE) == RESET);
+      
+      // Lire le caractère reçu
+      test_char = (uint8_t)(huart2.Instance->DR & 0x00FF);
+      
+      // Afficher l'écho du caractère reçu
+      HAL_UART_Transmit(&huart2, &test_char, 1, 100);
+      
+      // Si c'est un retour chariot ou une nouvelle ligne
+      if (test_char == '\r' || test_char == '\n')
+      {
+        HAL_UART_Transmit(&huart2, (uint8_t*)"\r\n", 2, 100); // Saut de ligne propre
+        if (test_idx > 0) // Si on a reçu des caractères avant
+          break;
+      }
+      // Sinon, ajouter au buffer
+      else if (test_idx < sizeof(test_buffer) - 1)
+      {
+        test_buffer[test_idx++] = test_char;
+      }
+    }
+    
+    // Terminer la chaîne
+    test_buffer[test_idx] = '\0';
+    
+    // Vérifier si l'utilisateur veut quitter
+    if (test_idx == 1 && test_buffer[0] == 'q')
+    {
+      char exit_msg[] = "\r\nFin du test UART\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)exit_msg, strlen(exit_msg), HAL_MAX_DELAY);
+      break;
+    }
+    
+    // Afficher la ligne reçue
+    char response[100];
+    sprintf(response, "Vous avez saisi: %s\r\n> ", test_buffer);
+    HAL_UART_Transmit(&huart2, (uint8_t*)response, strlen(response), HAL_MAX_DELAY);
+  }
+  
+  // Réactiver les interruptions UART pour le reste du programme
+  __HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE);
+  
+  // Redémarrer la réception par interruption
+  HAL_UART_Receive_IT(&huart2, (uint8_t*)&rxData, 1);
+}
+/* USER CODE END 1 */
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

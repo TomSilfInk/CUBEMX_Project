@@ -120,8 +120,9 @@ int main(void)
   {
 
     /*Test des singletons*/
+    UART_Test();
     // Vérifier l'état du bouton poussoir
-    Check_Button();
+    /* Check_Button();
     
     // Traiter les commandes UART reçues
     if (rxComplete) {
@@ -133,7 +134,7 @@ int main(void)
     MotorControl_Update();
     
     // Délai pour ne pas surcharger le CPU
-    HAL_Delay(20);
+    HAL_Delay(20); */
   }
   /* USER CODE END 3 */
 }
