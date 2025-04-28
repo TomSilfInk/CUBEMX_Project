@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200809L
+#include <time.h>
 #include <gpiod.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +9,15 @@
 #define PWM_PERIOD_US 20000  // 20ms = 50Hz
 #define MIN_PULSE_US 1000    // 1ms
 #define MAX_PULSE_US 2000    // 2ms
+
+// Fonction utilitaire pour le délai en microsecondes
+static void delay_us(unsigned int us)
+{
+    struct timespec ts;
+    ts.tv_sec = us / 1000000;
+    ts.tv_nsec = (us % 1000000) * 1000;
+    nanosleep(&ts, NULL);
+}
 
 int servo_init(struct servo_ctx *ctx, unsigned int pin)
 {
@@ -44,9 +55,9 @@ void servo_set_angle(struct servo_ctx *ctx, int angle)
     // Generate PWM signal
     while (ctx->running) {
         gpiod_line_set_value(ctx->line, 1);
-        usleep(pulse_width);
+        delay_us(pulse_width);
         gpiod_line_set_value(ctx->line, 0);
-        usleep(PWM_PERIOD_US - pulse_width);
+        delay_us(PWM_PERIOD_US - pulse_width);
     }
 }
 

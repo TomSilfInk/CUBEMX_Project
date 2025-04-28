@@ -1,33 +1,34 @@
 EXEC = executable.elf
 
-# Compilateur croisé à utiliser (à adapter)
-RASPBERRY_GCC = arm-linux-gnueabihf-gcc
+# Compilateur
+CC = gcc
+LD = gcc
 
-# Sysroot (à adapter)
-#RASPBERRY_SYSROOT = /<path>/<to>/<raspberry>/<rootfs>/
+# Flags
+CCFLAGS += -std=c99 -Wall -pedantic -D_GNU_SOURCE
+LDFLAGS += -lgpiod -lpthread
 
-# Compilateur.
-CC = $(RASPBERRY_GCC)
-LD = $(RASPBERRY_GCC)
-#CCFLAGS += --sysroot=$(RASPBERRY_SYSROOT)
-CCFLAGS += -std=c99 -Wall -pedantic
+# Dossiers
+SRC_DIR = src
+BUILD_DIR = build
 
+# Sources et objets
+SRCS = $(wildcard $(SRC_DIR)/*.c)
+OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
-#Organisation des sources
-SRC = 	$(wildcard *.c) 
+# Création du dossier build si nécessaire
+$(shell mkdir -p $(BUILD_DIR))
 
-OBJ = 	$(SRC:.c=.o)
-
-
-#Regles de compilations
+# Règles de compilation
 all: $(EXEC)
 
-$(EXEC): $(OBJ)
-	$(LD) $^ -o $@ $(LDFLAGS)
+$(EXEC): $(OBJS)
+	$(LD) $(OBJS) -o $@ $(LDFLAGS)
 
-%.o: %.c
-	$(CC) $(CCFLAGS) -c $< -o $@
-	
-#Clean Project
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+    $(CC) $(CCFLAGS) -c $< -o $@
+
 clean:
-	$(RM) *.o $(EXEC)
+    rm -rf $(BUILD_DIR) $(EXEC)
+
+.PHONY: all clean

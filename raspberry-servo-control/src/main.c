@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "servo.h"
 
-#define SERVO_PIN 18  // GPIO18
+#define SERVO_PIN 12  // GPIO12
 
 struct servo_ctx servo;
 pthread_t pwm_thread;
