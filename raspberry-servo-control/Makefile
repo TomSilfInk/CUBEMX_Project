@@ -26,9 +26,9 @@ $(EXEC): $(OBJS)
 	$(LD) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-    $(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:
-    rm -rf $(BUILD_DIR) $(EXEC)
+	rm -rf $(BUILD_DIR) $(EXEC)
 
 .PHONY: all clean
