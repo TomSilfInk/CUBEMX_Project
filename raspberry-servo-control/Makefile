@@ -5,7 +5,7 @@ CC = gcc
 LD = gcc
 
 # Flags
-CCFLAGS += -std=c99 -Wall -pedantic -D_GNU_SOURCE
+CCFLAGS += -std=c99 -Wall -pedantic
 LDFLAGS += -lgpiod -lpthread
 
 # Dossiers
@@ -26,9 +26,9 @@ $(EXEC): $(OBJS)
 	$(LD) $(OBJS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-    $(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:
-    rm -rf $(BUILD_DIR) $(EXEC)
+	rm -rf $(BUILD_DIR) $(EXEC)
 
 .PHONY: all clean

@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
-#include <unistd.h>
+#include "UART.h"
 #include "servo.h"
+#include <termios.h>
 
 #define SERVO_PIN 12  // GPIO12
 
 struct servo_ctx servo;
-pthread_t pwm_thread;
+pthread_t servo_thread;
 
-void *pwm_task(void *arg)
+void *servo_task(void *arg)
 {
     int angle = *((int *)arg);
     servo_set_angle(&servo, angle);
@@ -18,38 +20,51 @@ void *pwm_task(void *arg)
 
 int main(void)
 {
+    int uart_fd;
+    char buffer[256];
     int angle = 0;
-
-    if (servo_init(&servo, SERVO_PIN) < 0) {
-        fprintf(stderr, "Failed to initialize servo\n");
+    
+    // Initialisation UART
+    uart_fd = uart_init("/dev/ttyAMA0", B115200);
+    if (uart_fd < 0) {
+        fprintf(stderr, "Failed to initialize UART\n");
         return EXIT_FAILURE;
     }
 
-    printf("Moving servo to different angles. Press Ctrl+C to exit.\n");
-
-    while (1) {
-        // Test different angles
-        int angles[] = {0, 90, 180};
-        
-        for (int i = 0; i < 3; i++) {
-            angle = angles[i];
-            printf("Moving to %d degrees\n", angle);
-            
-            // Create PWM thread
-            if (pthread_create(&pwm_thread, NULL, pwm_task, &angle) != 0) {
-                perror("pthread_create");
-                break;
-            }
-            
-            sleep(1);  // Hold position for 1 second
-            
-            // Stop PWM thread
-            servo.running = 0;
-            pthread_join(pwm_thread, NULL);
-            servo.running = 1;
-        }
+    // Initialisation Servo
+    if (servo_init(&servo, SERVO_PIN) < 0) {
+        fprintf(stderr, "Failed to initialize servo\n");
+        uart_close(uart_fd);
+        return EXIT_FAILURE;
     }
 
+    // Boucle principale
+    while(1) {
+        // Mise à jour position servo
+        angle = (angle + 45) % 180;  // Incrémente de 45° à chaque fois
+        
+        // Arrêt du thread précédent si existant
+        servo.running = 0;
+        if (servo_thread) {
+            pthread_join(servo_thread, NULL);
+        }
+        
+        // Démarrage nouveau thread pour le servo
+        servo.running = 1;
+        if (pthread_create(&servo_thread, NULL, servo_task, &angle) != 0) {
+            perror("pthread_create");
+            break;
+        }
+
+        // Envoi position via UART
+        snprintf(buffer, sizeof(buffer), "Position servo: %d degrees\n", angle);
+        uart_send(uart_fd, buffer, strlen(buffer));
+
+        sleep(1);
+    }
+
+    // Nettoyage
     servo_cleanup(&servo);
-    return EXIT_SUCCESS;
+    uart_close(uart_fd);
+    return 0;
 }
