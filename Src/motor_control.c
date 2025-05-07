@@ -267,17 +267,21 @@
     }
   }
   
-  static void MotorControl_HandleUartMode(void) {
+  static void 
+  MotorControl_HandleUartMode(void) {
     // En mode UART, le moteur est déjà positionné lors de la réception de la commande
     // Donc rien à faire ici pour l'instant
-    
-    // Éventuellement, envoyer périodiquement la position actuelle
+
+    // Éventuellement, envoyer périodiquement la position actuelle et la distance
     uint32_t currentTime = HAL_GetTick();
-    if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
+    if (currentTime - lastDistanceUpdate > 100) { // Toutes les 100 ms
       lastDistanceUpdate = currentTime;
-      
-      char msg[50];
-      sprintf(msg, "Mode UART: Position %d deg\r\n", uartAngle);
+
+      uint32_t distance = SR04_GetDistance(); // Get distance from sensor
+
+      // Envoyer uniquement la distance
+      char msg[20]; // Taille réduite
+      sprintf(msg, "%lu\r\n", distance); // Format simple
       HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
   }
@@ -292,12 +296,15 @@
     
     // 3. Envoyer périodiquement les données via UART
     uint32_t currentTime = HAL_GetTick();
-    if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
+    if (currentTime - lastDistanceUpdate > 100) { // Toutes les 100 ms
       lastDistanceUpdate = currentTime;
-      
-      char msg[100];
-      sprintf(msg, "Mode TEST: Distance = %lu cm, Motor sweeping\r\n", distance);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+
+      uint32_t distance = SR04_GetDistance(); // Get distance from sensor
+
+      // Envoyer uniquement la distance
+      char msg[20]; // Taille réduite
+      sprintf(msg, "%lu\r\n", distance); // Format simple
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
     
     // Note: La gestion des commandes UART se fait dans Process_UART_Command dans main.c
