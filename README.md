@@ -48,6 +48,12 @@ Le schéma fonctionnel du système comprend :
 | PA2 | USART2_TX| Transmission de données série |
 | PA3 | USART2_RX| Réception de données série |
 
+### Broches utilisées pour la Raspberry
+| Broche | Fonction | Description |
+| pin32 | SERVO_PIN | Pin de Control du servo moteur sur la Raspberry |
+| pin8 | UART_TX | Uart transmiter |
+| pin10 | UART_RX | Uart receiver |
+
 ## Configuration matérielle (CubeMX)
 
 ### Configuration du Timer 2 (TIM2)
