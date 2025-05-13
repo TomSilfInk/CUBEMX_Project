@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h> 
 #include <poll.h>
 #include "UART.h"
 #include "servo.h"
@@ -167,38 +168,37 @@ void *uart_rx_task(void *arg)
             if (bytes_read > 0) {
                 buffer[bytes_read] = '\0';
                 
-                // Traiter uniquement en mode 1 (UART->Servo)
-                if (current_mode == MODE_UART_TO_SERVO) {
-                    printf("%s\n", buffer);
+                // Supprimer les caractères de nouvelle ligne et retour chariot
+                // pour avoir uniquement le nombre
+                char *clean_str = buffer;
+                while (*clean_str) {
+                    if (*clean_str == '\r' || *clean_str == '\n') {
+                        *clean_str = '\0';
+                        break;
+                    }
+                    clean_str++;
+                }
+                
+                // Convertir en nombre
+                int received_angle = atoi(buffer);
+                
+                // Afficher uniquement si ce n'est pas 0 ou si c'est vraiment "0"
+                if (received_angle != 0 || (buffer[0] == '0' && buffer[1] == '\0')) {
+                    printf("Angle reçu: %d\n", received_angle);
                     
-                    // Extraire l'angle de la chaîne reçue
-                    int received_angle = extract_number(buffer);
+                    // Mettre à jour l'angle du servo
+                    int angle_copy = received_angle;
                     
-                    if (received_angle >= 1 && received_angle <= 179) {
-                        // Mettre à jour l'angle du servo
-                        current_angle = received_angle;
-                        
-                        // Arrêt du thread précédent si existant
-                        servo.running = 0;
-                        if (servo_thread) {
-                            pthread_join(servo_thread, NULL);
-                        }
-                        
-                        // Démarrage nouveau thread pour le servo
-                        servo.running = 1;
-                        if (pthread_create(&servo_thread, NULL, servo_task, &current_angle) != 0) {
-                            perror("pthread_create (servo_thread)");
-                            snprintf(response, sizeof(response), "Erreur: Impossible de contrôler le servo\r\n");
-                        } else {
-                            snprintf(response, sizeof(response), "%d\r\n", current_angle);
-                        }
-                        
-                        // Renvoyer la réponse via UART
-                        uart_send(uart_fd, response, strlen(response));
-                    } else if (received_angle != -1) {
-                        // Angle hors limites
-                        snprintf(response, sizeof(response), "Angle %d ignoré (hors limites 1-179)\r\n", received_angle);
-                        uart_send(uart_fd, response, strlen(response));
+                    // Arrêt du thread précédent si existant
+                    servo.running = 0;
+                    if (servo_thread) {
+                        pthread_join(servo_thread, NULL);
+                    }
+                    
+                    // Démarrage nouveau thread pour le servo
+                    servo.running = 1;
+                    if (pthread_create(&servo_thread, NULL, servo_task, &angle_copy) != 0) {
+                        perror("pthread_create (servo_thread)");
                     }
                 }
             }
@@ -210,7 +210,7 @@ void *uart_rx_task(void *arg)
 int main(void)
 {
     int uart_fd;
-    char buffer[256];
+    int angle = 0;
     
     // Initialisation UART
     uart_fd = uart_init("/dev/ttyAMA0", B115200);
@@ -233,26 +233,15 @@ int main(void)
         uart_close(uart_fd);
         return EXIT_FAILURE;
     }
-    
-    // Démarrer le thread de saisie clavier
-    if (pthread_create(&keyboard_thread, NULL, keyboard_task, &uart_fd) != 0) {
-        perror("pthread_create (keyboard_thread)");
-        running = 0;
-        pthread_join(uart_rx_thread, NULL);
-        servo_cleanup(&servo);
-        uart_close(uart_fd);
-        return EXIT_FAILURE;
-    }
 
     // Message de démarrage
-    printf("Système de contrôle servo initialisé.\n");
-    printf("Appuyez sur 'a' pour le Mode 1 (UART -> Servo) ou 'b' pour le Mode 2 (Terminal -> UART)\n");
-    snprintf(buffer, sizeof(buffer), "Système de contrôle servo initialisé. Mode 1 actif par défaut.\r\n");
-    uart_send(uart_fd, buffer, strlen(buffer));
-
-    // Boucle principale simplifiée - plus de mise à jour automatique
+    printf("Programme de contrôle servo lancé\n");
+    printf("Réception des angles via UART\n");
+    
+    // Boucle principale simplifiée - uniquement attente de réception UART
     while(running) {
-        sleep(1);  // Attente simple pour maintenir le thread principal actif
+        // Attendre les commandes UART au lieu de générer des angles
+        sleep(1);
     }
 
     // Nettoyage
