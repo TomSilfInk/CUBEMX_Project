@@ -8,11 +8,11 @@
 #include "servo.h"
 #include <termios.h>
 #include <ctype.h>  // Pour isdigit()
-#include <unistd.h> // Pour sleep()
 
 #define SERVO_PIN 12  // GPIO12
-#define MODE_UART_TO_SERVO 1
-#define MODE_TERMINAL_TO_UART 2
+#define MODE_DISTANCE 1
+#define MODE_MANUAL 2
+#define MODE_STOP 3
 
 struct servo_ctx servo;
 pthread_t servo_thread;
@@ -20,7 +20,7 @@ pthread_t uart_rx_thread;
 pthread_t keyboard_thread;
 volatile int running = 1;
 volatile int current_angle = 0;  // Pour stocker l'angle actuel
-volatile int current_mode = MODE_UART_TO_SERVO; // Mode par défaut
+volatile int current_mode = MODE_DISTANCE; // Mode par défaut
 
 void *servo_task(void *arg)
 {
@@ -77,6 +77,18 @@ void restore_terminal_input() {
     tcsetattr(STDIN_FILENO, TCSANOW, &old_t);
 }
 
+// Fonction pour envoyer des commandes de mode à la STM32
+void send_mode_command(int uart_fd, const char *mode) {
+    char command[20];
+    snprintf(command, sizeof(command), "MODE:%s\r\n", mode);
+    
+    // Afficher la commande envoyée pour le débogage
+    printf("Envoi: %s", command);
+    
+    // Envoyer la commande via UART
+    uart_send(uart_fd, command, strlen(command));
+}
+
 // Thread pour la saisie clavier
 void *keyboard_task(void *arg) {
     int uart_fd = *((int *)arg);
@@ -90,36 +102,44 @@ void *keyboard_task(void *arg) {
     while(running) {
         if (read(STDIN_FILENO, &c, 1) > 0) {
             if (c == 'a' || c == 'A') {
-                current_mode = MODE_UART_TO_SERVO;
-                printf("\nMode 1 activé: Réception UART vers Servo\n");
-                snprintf(uart_buffer, sizeof(uart_buffer), "Mode 1 activé: Attente d'angle (1-179)\r\n");
-                uart_send(uart_fd, uart_buffer, strlen(uart_buffer));
+                current_mode = MODE_DISTANCE;
+                printf("\nMode Distance activé\n");
+                send_mode_command(uart_fd, "DISTANCE");
                 input_pos = 0;
                 memset(input_buffer, 0, sizeof(input_buffer));
             }
             else if (c == 'b' || c == 'B') {
-                current_mode = MODE_TERMINAL_TO_UART;
-                printf("\nMode 2 activé: Terminal vers UART\n");
-                printf("Entrez un angle (1-179): ");
+                current_mode = MODE_MANUAL;
+                printf("\nMode Manuel activé\n");
+                printf("Entrez un angle (0-179): ");
                 fflush(stdout);
+                send_mode_command(uart_fd, "MANUAL");
                 input_pos = 0;
                 memset(input_buffer, 0, sizeof(input_buffer));
             }
-            else if (current_mode == MODE_TERMINAL_TO_UART) {
-                // Mode 2: Traitement de la saisie clavier
+            else if (c == 'c' || c == 'C') {
+                current_mode = MODE_STOP;
+                printf("\nArrêt du système\n");
+                send_mode_command(uart_fd, "STOP");
+                input_pos = 0;
+                memset(input_buffer, 0, sizeof(input_buffer));
+                running = 0;  // Sortir de la boucle principale
+            }
+            else if (current_mode == MODE_MANUAL) {
+                // Mode manuel: Traitement de la saisie clavier
                 if (c == '\n' || c == '\r') {
                     // Traiter l'entrée complète
                     input_buffer[input_pos] = '\0';
                     int angle = atoi(input_buffer);
                     
-                    if (angle >= 1 && angle <= 179) {
+                    if (angle >= 0 && angle <= 179) {
                         // Envoyer l'angle via UART
                         snprintf(uart_buffer, sizeof(uart_buffer), "%d\r\n", angle);
                         uart_send(uart_fd, uart_buffer, strlen(uart_buffer));
                         printf("\nAngle %d envoyé via UART\n", angle);
-                        printf("Entrez un angle (1-179): ");
+                        printf("Entrez un angle (0-179): ");
                     } else {
-                        printf("\nAngle invalide. Entrez une valeur entre 1 et 179: ");
+                        printf("\nAngle invalide. Entrez une valeur entre 0 et 179: ");
                     }
                     
                     input_pos = 0;
@@ -141,7 +161,7 @@ void *keyboard_task(void *arg) {
                 }
             }
         }
-        sleep(10000);  // Pause court pour ne pas surcharger le CPU
+        usleep(10000);  // Pause courte pour ne pas surcharger le CPU (10ms)
     }
     
     restore_terminal_input();
@@ -152,7 +172,6 @@ void *uart_rx_task(void *arg)
 {
     int uart_fd = *((int *)arg);
     char buffer[256];
-    char response[256];
     int bytes_read;
     struct pollfd fds[1];
     
@@ -160,8 +179,8 @@ void *uart_rx_task(void *arg)
     fds[0].events = POLLIN;
     
     while (running) {
-        // Vérifie s'il y a des données à lire avec un timeout de 100ms
-        int ret = poll(fds, 1, 100);
+        // Vérifie s'il y a des données à lire avec un timeout de 10ms (plus rapide)
+        int ret = poll(fds, 1, 10);
         if (ret > 0 && (fds[0].revents & POLLIN)) {
             // Lire les données disponibles
             bytes_read = uart_receive(uart_fd, buffer, sizeof(buffer) - 1);
@@ -185,6 +204,14 @@ void *uart_rx_task(void *arg)
                 // Afficher uniquement si ce n'est pas 0 ou si c'est vraiment "0"
                 if (received_angle != 0 || (buffer[0] == '0' && buffer[1] == '\0')) {
                     printf("Angle reçu: %d\n", received_angle);
+                    current_angle = received_angle;
+                    
+                    // En mode DISTANCE, renvoyer la valeur reçue
+                    if (current_mode == MODE_DISTANCE) {
+                        char response[20];
+                        snprintf(response, sizeof(response), "%d\r\n", received_angle);
+                        uart_send(uart_fd, response, strlen(response));
+                    }
                     
                     // Mettre à jour l'angle du servo
                     int angle_copy = received_angle;
@@ -210,7 +237,6 @@ void *uart_rx_task(void *arg)
 int main(void)
 {
     int uart_fd;
-    int angle = 0;
     
     // Initialisation UART
     uart_fd = uart_init("/dev/ttyAMA0", B115200);
@@ -233,25 +259,47 @@ int main(void)
         uart_close(uart_fd);
         return EXIT_FAILURE;
     }
+    
+    // Démarrer le thread de saisie clavier
+    if (pthread_create(&keyboard_thread, NULL, keyboard_task, &uart_fd) != 0) {
+        perror("pthread_create (keyboard_thread)");
+        running = 0;
+        pthread_join(uart_rx_thread, NULL);
+        servo_cleanup(&servo);
+        uart_close(uart_fd);
+        return EXIT_FAILURE;
+    }
 
     // Message de démarrage
     printf("Programme de contrôle servo lancé\n");
-    printf("Réception des angles via UART\n");
+    printf("Commandes disponibles:\n");
+    printf("  a: Mode Distance (reçoit l'angle du capteur)\n");
+    printf("  b: Mode Manual (envoie l'angle saisi)\n");
+    printf("  c: Arrêt du système\n\n");
     
-    // Boucle principale simplifiée - uniquement attente de réception UART
+    // Envoi du mode initial (INIT)
+    send_mode_command(uart_fd, "INIT");
+    
+    // Attendre un moment pour que la STM32 traite la commande
+    usleep(500000);  // 500ms
+    
+    // Activer le mode distance par défaut
+    send_mode_command(uart_fd, "DISTANCE");
+    printf("Mode Distance activé par défaut\n");
+    
+    // Boucle principale simplifiée - uniquement attente des événements
     while(running) {
-        // Attendre les commandes UART au lieu de générer des angles
-        sleep(1);
+        usleep(100000);  // 100ms - légère pause
     }
 
     // Nettoyage
-    running = 0;
+    printf("Nettoyage et sortie...\n");
     pthread_join(uart_rx_thread, NULL);
     pthread_join(keyboard_thread, NULL);
     if (servo_thread) {
+        servo.running = 0;
         pthread_join(servo_thread, NULL);
     }
-    restore_terminal_input();
     servo_cleanup(&servo);
     uart_close(uart_fd);
     return 0;
