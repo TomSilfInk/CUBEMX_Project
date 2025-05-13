@@ -125,27 +125,28 @@ static void Motor_stop();
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // Allumer LED verte
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // Éteindre LED bleue
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);    // Allumer LED orange
-    char msg_init[] = "STM32_MODE_INIT : INIT\r\n";
+    char msg_init[MAX_BUFFER_SIZE] = "STM32_MODE_INIT : INIT\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)msg_init, strlen(msg_init), HAL_MAX_DELAY);
     Motor_SetPosition(90);
     TRACE("Demarrage\n");
   }
 
   static void Motor_stop(){
+    currentState = S_DEATH;
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);  // Éteindre LED verte
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);  // Éteindre LED bleue
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);  // Éteindre LED orange
-    char msg_stop[] = "STM32_MODE_STOP : STOP\r\n";
+    char msg_stop[MAX_BUFFER_SIZE] = "STM32_MODE_STOP : STOP\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)msg_stop, strlen(msg_stop), HAL_MAX_DELAY);
     TRACE("Arret\n");
   }
 
-
   static void MotorControl_HandleDistanceMode(void) {
+    currentState = S_MODE_DISTANCE;
     // Lire la distance du capteur
     uint32_t distance = SR04_GetDistance();
-    int angle; 
-    // Convertion de la distance en angla
+    int angle;
+    // Convertion de la distance en angle
 
     if(distance >= 25){
       angle = 0; 
@@ -176,7 +177,7 @@ static void Motor_stop();
   }
   
   static void  MotorControl_HandleManualMode(void) {
-
+    currentState = S_MODE_MANUAL;
     // Lire l'angle de l'UART
     uint8_t uartAngle;
     HAL_UART_Receive(&huart2, &uartAngle, 1, HAL_MAX_DELAY);

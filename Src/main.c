@@ -38,7 +38,7 @@ typedef enum {
 // Définition du bouton poussoir (à ajuster selon votre schéma)
 #define BUTTON_PORT GPIOA
 #define BUTTON_PIN GPIO_PIN_0
-
+#define MAX_BUFFER_SIZE 50
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -191,6 +191,8 @@ void Process_UART_Command(void)
   // Terminer la chaîne de caractères
   rxBuffer[rxIndex] = '\0';
 
+  // Debug
+  
   if(strncmp((char*) rxBuffer, "MODE:DISTANCE", strlen("MODE:DISTANCE")) == 0){
     Motor_setDistanceMode(); // Passer en mode distance
 
@@ -209,7 +211,8 @@ void Process_UART_Command(void)
 
 
   else{
-    char errorMsg[50] = "Commande inconnue\n";
+    char errorMsg[MAX_BUFFER_SIZE];
+    snprintf(errorMsg, sizeof(errorMsg), "Erreur, voici la commande reçu : %s\n", rxBuffer);
     HAL_UART_Transmit(&huart2, (uint8_t*)errorMsg, strlen(errorMsg), HAL_MAX_DELAY);
   }
   rxIndex = 0; // Réinitialiser l'index du buffer
