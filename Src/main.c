@@ -12,10 +12,11 @@
 #include "usart.h"
 #include "gpio.h"
 #include "SR04.h"
-#include "motor_control.h"  // Nouveau: inclusion du contrôleur moteur
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "motor_control.h"
+#include "utils.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -98,8 +99,6 @@ void Error_Handler(void);
    
    /* Initialisation du capteur, du moteur et du contrôleur */
    SR04_Init();         // Initialiser le capteur SR04
-   Motor_Init();        // Initialiser le moteur
-   MotorControl_Init(); // Initialiser le contrôleur moteur
    
    /* Configuration de la réception UART par interruption */
    HAL_UART_Receive_IT(&huart2, &rxData, 1);
@@ -114,19 +113,12 @@ void Error_Handler(void);
    /*Infinite loop*/
    while (1)
    {
-     // Vérifier l'état du bouton poussoir
-     Check_Button();
-     
      // Traiter les commandes UART reçues
      if (rxComplete) {
        Process_UART_Command();
        rxComplete = 0;
      }
      
-     // Mettre à jour le contrôleur moteur
-     MotorControl_Update();
-     
-     // Délai pour ne pas surcharger le CPU
      HAL_Delay(20);
    }
  }
@@ -192,84 +184,36 @@ void Send_UART_Message(void)
   HAL_UART_Transmit(&huart2, (uint8_t*)message, sizeof(message) - 1, HAL_MAX_DELAY);
 }
 
-// Nouvelle fonction: Vérifier l'état du bouton poussoir
-void Check_Button(void)
-{
-  static uint8_t lastButtonState = GPIO_PIN_RESET;
-  uint32_t currentTime = HAL_GetTick();
-  
-  // Vérifier l'état du bouton toutes les 50ms (debounce)
-  if (currentTime - lastButtonCheck > 50) {
-    lastButtonCheck = currentTime;
-    
-    // Lire l'état du bouton
-    uint8_t buttonState = HAL_GPIO_ReadPin(BUTTON_PORT, BUTTON_PIN);
-    
-    // Détecter un front montant (appui sur le bouton)
-    if (buttonState == GPIO_PIN_SET && lastButtonState == GPIO_PIN_RESET) {
-      // Notifier le contrôleur moteur
-      MotorControl_ButtonPressed();
-    }
-    
-    lastButtonState = buttonState;
-  }
-}
+
 
 void Process_UART_Command(void)
 {
   // Terminer la chaîne de caractères
   rxBuffer[rxIndex] = '\0';
+
+  if(strncmp((char*) rxBuffer, "MODE:DISTANCE", strlen("MODE:DISTANCE")) == 0){
+    Motor_setDistanceMode(); // Passer en mode distance
+
   
-  // Vérifier si nous sommes en mode test
-  if (MotorControl_GetState() == S_MODE_TEST) {
-    // Commande 'q': quitter le mode test
-    if (rxIndex == 1 && rxBuffer[0] == 'q') {
-      MotorControl_ButtonPressed(); // Simuler un appui sur le bouton pour retourner au mode DISTANCE
-      rxIndex = 0;
-      return;
-    }
-    
-    // Commandes '1'-'3': changer l'angle du moteur
-    if (rxIndex == 1 && rxBuffer[0] >= '1' && rxBuffer[0] <= '3') {
-      int angle = (rxBuffer[0] - '0') * 60; // 1->60°, 2->120°, 3->180°
-      Motor_SetPosition(angle);
-      
-      char msg[50];
-      sprintf(msg, "Position moteur fixée à %d degrés\r\n", angle);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
-      
-      rxIndex = 0;
-      return;
-    }
-    
-    // En mode TEST, traiter toute autre entrée comme un écho simple
-    char echo_msg[100];
-    sprintf(echo_msg, "Echo (mode TEST): %s\r\n", rxBuffer);
-    HAL_UART_Transmit(&huart2, (uint8_t*)echo_msg, strlen(echo_msg), 100);
-    rxIndex = 0;
-    return;
+  }else if(strncmp((char*) rxBuffer, "MODE:MANUAL", strlen("MODE:MANUAL")) == 0){
+    Motor_setManualMode(); // Passer en mode manuel
+
+
+  }else if(strncmp((char*) rxBuffer, "MODE:STOP", strlen("MODE:STOP")) == 0){
+    Motor_OFF(); // Arrêter le moteur
+
+
+  }else if(strncmp((char*) rxBuffer, "MODE:INIT", strlen("MODE:INIT")) == 0){
+    Motor_ON(); // Démarrer le moteur
   }
-  
-  // Convertir la chaîne en nombre (en évitant atoi qui peut être lent)
-  int angle = 0;
-  for (uint8_t i = 0; i < rxIndex; i++) {
-    if (rxBuffer[i] >= '0' && rxBuffer[i] <= '9') {
-      angle = angle * 10 + (rxBuffer[i] - '0');
-    }
+
+
+  else{
+    char errorMsg[50] = "Commande inconnue\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)errorMsg, strlen(errorMsg), HAL_MAX_DELAY);
   }
-  
-  // Vérifier si l'angle est valide
-  if (angle >= 0 && angle <= 180) {
-    // Mettre à jour l'angle via le contrôleur moteur immédiatement
-    MotorControl_SetUartAngle((uint8_t)angle);
-  } else {
-    // Message d'erreur (avec timeout court)
-    char errMsg[] = "Erreur: angle doit etre entre 0 et 180\r\n";
-    HAL_UART_Transmit(&huart2, (uint8_t*)errMsg, strlen(errMsg), 100);
-  }
-  
-  // Réinitialiser l'index pour la prochaine commande
-  rxIndex = 0;
+  rxIndex = 0; // Réinitialiser l'index du buffer
+  memset(rxBuffer, 0, sizeof(rxBuffer)); // Réinitialiser le buffer
 }
 
 // Callback d'interruption UART
