@@ -12,7 +12,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "SR04.h"
-#include "motor_control.h"  // Nouveau: inclusion du contrôleur moteur
+#include "motor_control.h"  // Inclusion du contrôleur moteur
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -59,6 +59,7 @@ SystemMode currentMode = MODE_DISTANCE;  // Mode par défaut
 uint8_t uartAngle = 90;                 // Position par défaut en mode UART
 uint32_t lastDistanceReport = 0;        // Pour envoyer la distance sur UART toutes les secondes
 uint32_t lastButtonCheck = 0;           // Pour le debounce du bouton
+volatile int running = 1;               // Flag pour le fonctionnement
 
 /* USER CODE END PV */
 
@@ -110,7 +111,7 @@ void Error_Handler(void);
                     "Mode 2: Commande UART -> entrer angle (0-180)\r\n"
                     "Mode 3: TEST -> tous les modules actifs\r\n";
    HAL_UART_Transmit(&huart2, (uint8_t*)welcome, strlen(welcome), HAL_MAX_DELAY);
- 
+   
    /*Infinite loop*/
    while (1)
    {
@@ -291,6 +292,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     HAL_UART_Receive_IT(&huart2, &rxData, 1);
   }
 }
+
 /* USER CODE END 4 */
 
 /**

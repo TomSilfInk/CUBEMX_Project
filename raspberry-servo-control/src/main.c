@@ -40,10 +40,40 @@ void *uart_rx_task(void *arg)
             bytes_read = uart_receive(uart_fd, buffer, sizeof(buffer) - 1);
             if (bytes_read > 0) {
                 buffer[bytes_read] = '\0';
-                printf("UART Reçu: %s\n", buffer);
                 
-                // Traitement des données reçues si nécessaire
-                // Par exemple, convertir en angle pour le servo-moteur
+                // Supprimer les caractères de nouvelle ligne et retour chariot
+                // pour avoir uniquement le nombre
+                char *clean_str = buffer;
+                while (*clean_str) {
+                    if (*clean_str == '\r' || *clean_str == '\n') {
+                        *clean_str = '\0';
+                        break;
+                    }
+                    clean_str++;
+                }
+                
+                // Convertir en nombre
+                int received_angle = atoi(buffer);
+                
+                // Afficher uniquement si ce n'est pas 0 ou si c'est vraiment "0"
+                if (received_angle != 0 || (buffer[0] == '0' && buffer[1] == '\0')) {
+                    printf("Angle reçu: %d\n", received_angle);
+                    
+                    // Mettre à jour l'angle du servo
+                    int angle_copy = received_angle;
+                    
+                    // Arrêt du thread précédent si existant
+                    servo.running = 0;
+                    if (servo_thread) {
+                        pthread_join(servo_thread, NULL);
+                    }
+                    
+                    // Démarrage nouveau thread pour le servo
+                    servo.running = 1;
+                    if (pthread_create(&servo_thread, NULL, servo_task, &angle_copy) != 0) {
+                        perror("pthread_create (servo_thread)");
+                    }
+                }
             }
         }
     }
@@ -53,7 +83,6 @@ void *uart_rx_task(void *arg)
 int main(void)
 {
     int uart_fd;
-    char buffer[256];
     int angle = 0;
     
     // Initialisation UART
@@ -78,28 +107,13 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    // Boucle principale
+    // Message de démarrage
+    printf("Programme de contrôle servo lancé\n");
+    printf("Réception des angles via UART\n");
+    
+    // Boucle principale simplifiée - uniquement attente de réception UART
     while(running) {
-        // Mise à jour position servo
-        angle = (angle + 45) % 180;  // Incrémente de 45° à chaque fois
-        
-        // Arrêt du thread précédent si existant
-        servo.running = 0;
-        if (servo_thread) {
-            pthread_join(servo_thread, NULL);
-        }
-        
-        // Démarrage nouveau thread pour le servo
-        servo.running = 1;
-        if (pthread_create(&servo_thread, NULL, servo_task, &angle) != 0) {
-            perror("pthread_create (servo_thread)");
-            break;
-        }
-
-        // Envoi position via UART
-        snprintf(buffer, sizeof(buffer), "Position servo: %d degrees\r\n", angle);
-        uart_send(uart_fd, buffer, strlen(buffer));
-
+        // Attendre les commandes UART au lieu de générer des angles
         sleep(1);
     }
 

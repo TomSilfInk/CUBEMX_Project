@@ -38,4 +38,7 @@
   void Motor_SetPosition(int angle);
   void Motor_Test(void);
   
+  // Pour accéder à l'angle actuel du mode test
+  int Motor_GetTestAngle(void);
+  
   #endif /* MOTOR_CONTROL_H */

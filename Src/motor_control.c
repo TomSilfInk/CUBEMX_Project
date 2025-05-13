@@ -152,12 +152,12 @@
     if (currentState == S_MODE_DISTANCE) {
       MotorControl_ProcessEvent(E_UART_COMMAND);
     } 
-    // Sinon, envoyer juste la confirmation
+    // Sinon, envoyer juste l'angle sans texte
     else {
-      // Message de confirmation (utiliser un timeout court pour ne pas bloquer)
-      char msg[50];
-      sprintf(msg, "Position moteur: %d deg\r\n", uartAngle);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100); // timeout 100ms au lieu de HAL_MAX_DELAY
+      // Envoyer uniquement l'angle
+      char msg[10];
+      sprintf(msg, "%d\r\n", uartAngle);
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
     }
   }
   
@@ -256,29 +256,28 @@
     // Positionner le moteur
     Motor_SetPosition(angle);
     
-    // Envoyer périodiquement la distance et l'angle sur UART
+    // Envoyer périodiquement UNIQUEMENT l'angle via UART
     uint32_t currentTime = HAL_GetTick();
     if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
-      lastDistanceUpdate = currentTime;
-      
-      char msg[50];
-      sprintf(msg, "Mode Distance: %lu cm -> %d deg\r\n", distance, angle);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        lastDistanceUpdate = currentTime;
+        
+        // Envoyer uniquement l'angle
+        char msg[10];
+        sprintf(msg, "%d\r\n", angle);
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
   }
   
   static void MotorControl_HandleUartMode(void) {
-    // En mode UART, le moteur est déjà positionné lors de la réception de la commande
-    // Donc rien à faire ici pour l'instant
-    
-    // Éventuellement, envoyer périodiquement la position actuelle
+    // Envoyer périodiquement UNIQUEMENT l'angle
     uint32_t currentTime = HAL_GetTick();
     if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
-      lastDistanceUpdate = currentTime;
-      
-      char msg[50];
-      sprintf(msg, "Mode UART: Position %d deg\r\n", uartAngle);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+        lastDistanceUpdate = currentTime;
+        
+        // Envoyer uniquement l'angle
+        char msg[10];
+        sprintf(msg, "%d\r\n", uartAngle);
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
     }
   }
   
@@ -290,30 +289,40 @@
     // 2. Lire et afficher la distance du capteur
     uint32_t distance = SR04_GetDistance();
     
-    // 3. Envoyer périodiquement les données via UART
+    // 3. Envoyer périodiquement UNIQUEMENT l'angle actuel
     uint32_t currentTime = HAL_GetTick();
-    if (currentTime - lastDistanceUpdate > 1000) { // Toutes les secondes
-      lastDistanceUpdate = currentTime;
-      
-      char msg[100];
-      sprintf(msg, "Mode TEST: Distance = %lu cm, Motor sweeping\r\n", distance);
-      HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
+    if (currentTime - lastDistanceUpdate > 100) { // Plus fréquent pour débogage
+        lastDistanceUpdate = currentTime;
+        
+        // Récupérer l'angle actuel du balayage via la fonction d'accès
+        int current_angle = Motor_GetTestAngle();
+        
+        // Envoyer uniquement l'angle
+        char msg[10];
+        sprintf(msg, "%d\r\n", current_angle);
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 100);
     }
-    
-    // Note: La gestion des commandes UART se fait dans Process_UART_Command dans main.c
   }
   
-  void Motor_Test(void)
-  {
-      static int angle = 0;
-      static int direction = 1;
-  
-      angle += direction;
-  
-      if (angle >= 180 || angle <= 0)
-      {
-          direction = -direction;
-      }
-  
-      Motor_SetPosition(angle);
-  }
+  // Déclarez une variable globale pour stocker l'angle actuel du test
+static int testCurrentAngle = 0;
+
+void Motor_Test(void)
+{
+    static int direction = 1;
+
+    testCurrentAngle += direction;
+
+    if (testCurrentAngle >= 180 || testCurrentAngle <= 0)
+    {
+        direction = -direction;
+    }
+
+    Motor_SetPosition(testCurrentAngle);
+}
+
+// Fonction pour obtenir l'angle actuel du mode test
+int Motor_GetTestAngle(void)
+{
+    return testCurrentAngle;
+}
