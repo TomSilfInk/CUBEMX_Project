@@ -69,7 +69,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void Blink_LEDs(void);
 void Send_UART_Message(void);
-void Check_Button(void);
 void Process_UART_Command(void);
 void Error_Handler(void);
 /* USER CODE END PFP */
