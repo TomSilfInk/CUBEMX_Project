@@ -54,7 +54,6 @@
   
   /* Variables privées */
   static MotorState currentState = S_DEATH;
-  static uint8_t uartAngle = 90;           // Position par défaut en mode UART
   static uint32_t lastTimeUpdate = 0;  // Pour limiter les mises à jour
   
   /* Matrice de transition - machine à états */
@@ -79,8 +78,6 @@ static void Motor_run(MotorEvent motorEvent);
 static void Motor_performAction(MotorAction action);
 
 /*Fonction local pour positionner le moteur*/
-static void Motor_SetPosition(int angle);
-static void MotorControl_SetUartAngle(uint8_t angle);
 
 /*Fonction local pour faire les actions du moteurs*/
 static void Motor_start();
@@ -113,6 +110,18 @@ static void Motor_stop();
     TRACE("Mode manuel\n");
     Motor_run(E_SET_MODE_MANUAL_FROM_UART);
   }
+
+    extern void MotorControl_SetUartAngle(uint8_t angle) 
+  {
+    // Limiter l'angle entre 0 et 180
+    if (angle < 0)
+        angle = 0;
+    if (angle > 180)
+        angle = 180;
+  
+    uint16_t pulse_width = 5 + (angle * 2) / 45;
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+  }
   /*-----------------------------------------*/
   /* Fin des actions pour controler le moteur*/
 
@@ -127,7 +136,6 @@ static void Motor_stop();
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);    // Allumer LED orange
     char msg_init[MAX_BUFFER_SIZE] = "STM32_MODE_INIT : INIT\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)msg_init, strlen(msg_init), HAL_MAX_DELAY);
-    Motor_SetPosition(90);
     TRACE("Demarrage\n");
   }
 
@@ -169,11 +177,6 @@ static void Motor_stop();
 
     }
 
-    // Lecture de l'angle reçu via l'UART
-    uint8_t receivedAngle;
-    if(HAL_UART_Receive(&huart2, &receivedAngle, 1, HAL_MAX_DELAY) == HAL_OK){
-      MotorControl_SetUartAngle(receivedAngle);
-    }
   }
   
   static void  MotorControl_HandleManualMode(void) {
@@ -181,9 +184,6 @@ static void Motor_stop();
     // Lire l'angle de l'UART
     uint8_t uartAngle;
     HAL_UART_Receive(&huart2, &uartAngle, 1, HAL_MAX_DELAY);
-
-    // Positionner le moteur
-    MotorControl_SetUartAngle(uartAngle);
   }
 
   /*-----------------------------------------------------------*/
@@ -193,30 +193,10 @@ static void Motor_stop();
 
 
   /*-------------------------------------------------------------*/
-  // Fonction pour positionner le moteur
-  static void Motor_SetPosition(int angle)
-  {
-    if (angle < 0)
-        angle = 0;
-    if (angle > 180)
-        angle = 180;
-  
-    uint16_t pulse_width = 5 + (angle * 2) / 45;
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
-  }
-
 
   // Fonction qui devra être appelé une fois que les données auront été reçues via l'uart
 
-  static void MotorControl_SetUartAngle(uint8_t angle) 
-  {
-    // Limiter l'angle entre 0 et 180
-    if (angle > 180) angle = 180;
-    
-    // Stocker l'angle pour le mode UART
-    uartAngle = angle;
-    Motor_SetPosition(uartAngle); // Positionner le moteur
-  }
+
   
   /*-----------------------------------------------------------*/
   /*Fin des fonctions pour positionner le moteur*/
