@@ -54,7 +54,6 @@
   
   /* Variables privées */
   static MotorState currentState = S_DEATH;
-  static uint8_t uartAngle = 90;           // Position par défaut en mode UART
   static uint32_t lastTimeUpdate = 0;  // Pour limiter les mises à jour
   
   /* Matrice de transition - machine à états */
@@ -79,8 +78,6 @@ static void Motor_run(MotorEvent motorEvent);
 static void Motor_performAction(MotorAction action);
 
 /*Fonction local pour positionner le moteur*/
-static void Motor_SetPosition(int angle);
-static void MotorControl_SetUartAngle(uint8_t angle);
 
 /*Fonction local pour faire les actions du moteurs*/
 static void Motor_start();
@@ -113,6 +110,18 @@ static void Motor_stop();
     TRACE("Mode manuel\n");
     Motor_run(E_SET_MODE_MANUAL_FROM_UART);
   }
+
+    extern void MotorControl_SetUartAngle(uint8_t angle) 
+  {
+    // Limiter l'angle entre 0 et 180
+    if (angle < 0)
+        angle = 0;
+    if (angle > 180)
+        angle = 180;
+  
+    uint16_t pulse_width = 5 + (angle * 2) / 45;
+    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
+  }
   /*-----------------------------------------*/
   /* Fin des actions pour controler le moteur*/
 
@@ -125,27 +134,27 @@ static void Motor_stop();
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_RESET);  // Allumer LED verte
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_RESET);  // Éteindre LED bleue
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);    // Allumer LED orange
-    char msg_init[] = "STM32_MODE_INIT : INIT\r\n";
+    char msg_init[MAX_BUFFER_SIZE] = "STM32_MODE_INIT : INIT\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)msg_init, strlen(msg_init), HAL_MAX_DELAY);
-    Motor_SetPosition(90);
     TRACE("Demarrage\n");
   }
 
   static void Motor_stop(){
+    currentState = S_DEATH;
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);  // Éteindre LED verte
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_15, GPIO_PIN_SET);  // Éteindre LED bleue
     HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);  // Éteindre LED orange
-    char msg_stop[] = "STM32_MODE_STOP : STOP\r\n";
+    char msg_stop[MAX_BUFFER_SIZE] = "STM32_MODE_STOP : STOP\r\n";
     HAL_UART_Transmit(&huart2, (uint8_t*)msg_stop, strlen(msg_stop), HAL_MAX_DELAY);
     TRACE("Arret\n");
   }
 
-
   static void MotorControl_HandleDistanceMode(void) {
+    currentState = S_MODE_DISTANCE;
     // Lire la distance du capteur
     uint32_t distance = SR04_GetDistance();
-    int angle; 
-    // Convertion de la distance en angla
+    int angle;
+    // Convertion de la distance en angle
 
     if(distance >= 25){
       angle = 0; 
@@ -168,21 +177,13 @@ static void Motor_stop();
 
     }
 
-    // Lecture de l'angle reçu via l'UART
-    uint8_t receivedAngle;
-    if(HAL_UART_Receive(&huart2, &receivedAngle, 1, HAL_MAX_DELAY) == HAL_OK){
-      MotorControl_SetUartAngle(receivedAngle);
-    }
   }
   
   static void  MotorControl_HandleManualMode(void) {
-
+    currentState = S_MODE_MANUAL;
     // Lire l'angle de l'UART
     uint8_t uartAngle;
     HAL_UART_Receive(&huart2, &uartAngle, 1, HAL_MAX_DELAY);
-
-    // Positionner le moteur
-    MotorControl_SetUartAngle(uartAngle);
   }
 
   /*-----------------------------------------------------------*/
@@ -192,30 +193,10 @@ static void Motor_stop();
 
 
   /*-------------------------------------------------------------*/
-  // Fonction pour positionner le moteur
-  static void Motor_SetPosition(int angle)
-  {
-    if (angle < 0)
-        angle = 0;
-    if (angle > 180)
-        angle = 180;
-  
-    uint16_t pulse_width = 5 + (angle * 2) / 45;
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse_width);
-  }
-
 
   // Fonction qui devra être appelé une fois que les données auront été reçues via l'uart
 
-  static void MotorControl_SetUartAngle(uint8_t angle) 
-  {
-    // Limiter l'angle entre 0 et 180
-    if (angle > 180) angle = 180;
-    
-    // Stocker l'angle pour le mode UART
-    uartAngle = angle;
-    Motor_SetPosition(uartAngle); // Positionner le moteur
-  }
+
   
   /*-----------------------------------------------------------*/
   /*Fin des fonctions pour positionner le moteur*/

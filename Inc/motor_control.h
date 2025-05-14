@@ -11,8 +11,10 @@
   
   #include <stdint.h>
   
-  void extern Motor_ON();
-  void extern Motor_OFF();
-  void extern Motor_setDistanceMode();
-  void extern Motor_setManualMode();
+ extern void Motor_ON();
+ extern void Motor_OFF();
+ extern void Motor_setDistanceMode();
+ extern void Motor_setManualMode();
+ extern void MotorControl_SetUartAngle(uint8_t angle);
+
   #endif /* MOTOR_CONTROL_H */

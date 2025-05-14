@@ -38,7 +38,7 @@ typedef enum {
 // Définition du bouton poussoir (à ajuster selon votre schéma)
 #define BUTTON_PORT GPIOA
 #define BUTTON_PIN GPIO_PIN_0
-
+#define MAX_BUFFER_SIZE 256
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,7 +50,7 @@ typedef enum {
 
 /* USER CODE BEGIN PV */
 // Variables pour la réception UART
-uint8_t rxBuffer[10];
+uint8_t rxBuffer[MAX_BUFFER_SIZE];
 uint8_t rxData;
 uint8_t rxIndex = 0;
 uint8_t rxComplete = 0;
@@ -61,7 +61,7 @@ uint8_t uartAngle = 90;                 // Position par défaut en mode UART
 uint32_t lastDistanceReport = 0;        // Pour envoyer la distance sur UART toutes les secondes
 uint32_t lastButtonCheck = 0;           // Pour le debounce du bouton
 volatile int running = 1;               // Flag pour le fonctionnement
-
+uint8_t systemeInitialiszed = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -191,27 +191,70 @@ void Process_UART_Command(void)
   // Terminer la chaîne de caractères
   rxBuffer[rxIndex] = '\0';
 
-  if(strncmp((char*) rxBuffer, "MODE:DISTANCE", strlen("MODE:DISTANCE")) == 0){
-    Motor_setDistanceMode(); // Passer en mode distance
+  // Debug
+  char debugMsg[2*MAX_BUFFER_SIZE];
+  snprintf(debugMsg, sizeof(debugMsg), "Commande reçue : %s\n", rxBuffer);
+  HAL_UART_Transmit(&huart2, (uint8_t*)debugMsg, strlen(debugMsg), HAL_MAX_DELAY);
 
-  
-  }else if(strncmp((char*) rxBuffer, "MODE:MANUAL", strlen("MODE:MANUAL")) == 0){
-    Motor_setManualMode(); // Passer en mode manuel
+  if(strncmp((char*)rxBuffer, "MODE:INIT",strlen("MODE:INIT")) == 0)
+  {
+    Motor_ON();
+    systemeInitialiszed = 1;
+    char msg_init[MAX_BUFFER_SIZE] = "Système initialisé avec succès\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg_init, strlen(msg_init), HAL_MAX_DELAY);
+  }
+  else if(!systemeInitialiszed)
+  {
+    char msg_error[MAX_BUFFER_SIZE] = "Erreur: Système non initialisé\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg_error, strlen(msg_error), HAL_MAX_DELAY);
 
-
-  }else if(strncmp((char*) rxBuffer, "MODE:STOP", strlen("MODE:STOP")) == 0){
-    Motor_OFF(); // Arrêter le moteur
-
-
-  }else if(strncmp((char*) rxBuffer, "MODE:INIT", strlen("MODE:INIT")) == 0){
-    Motor_ON(); // Démarrer le moteur
   }
 
-
-  else{
-    char errorMsg[50] = "Commande inconnue\n";
-    HAL_UART_Transmit(&huart2, (uint8_t*)errorMsg, strlen(errorMsg), HAL_MAX_DELAY);
+  else if(strncmp((char*)rxBuffer, "MODE:DISTANCE",strlen("MODE:DISTANCE")) == 0)
+  {
+    currentMode = MODE_DISTANCE;
+    char msg_distance[MAX_BUFFER_SIZE] = "Mode distance activé\r\n";
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg_distance, strlen(msg_distance), HAL_MAX_DELAY);
   }
+  // Vérifier si la commande est "MODE:DISTANCE"
+  else if (strncmp((char*)rxBuffer, "MODE:DISTANCE", strlen("MODE:DISTANCE")) == 0) {
+      char msg_distance[MAX_BUFFER_SIZE] = "Mode distance activé\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg_distance, strlen(msg_distance), HAL_MAX_DELAY);
+      Motor_setDistanceMode(); // Passer en mode distance
+  }
+  // Vérifier si la commande est "MODE:MANUAL"
+  else if (strncmp((char*)rxBuffer, "MODE:MANUAL", strlen("MODE:MANUAL")) == 0) {
+      char msg_manual[2*MAX_BUFFER_SIZE] = "Mode manuel activé\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg_manual, strlen(msg_manual), HAL_MAX_DELAY);
+      Motor_setManualMode(); // Passer en mode manuel
+      int angle = atoi((char*)rxBuffer);
+      if(angle >= 0 && angle <180)
+      {
+        char msg_valide[2*MAX_BUFFER_SIZE];
+        snprintf(msg_valide, sizeof(msg_valide), "Angle valide : %d\r\n", angle);
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg_valide, strlen(msg_valide), HAL_MAX_DELAY);
+        uartAngle = angle; // Mettre à jour l'angle
+        MotorControl_SetUartAngle(uartAngle); // Positionner le moteur
+      }else{
+        char msg_invalide[2*MAX_BUFFER_SIZE];
+        snprintf(msg_invalide, sizeof(msg_invalide), "Angle invalide : %s\r\n", rxBuffer);
+        HAL_UART_Transmit(&huart2, (uint8_t*)msg_invalide, strlen(msg_invalide), HAL_MAX_DELAY);
+      }
+  }
+  // Vérifier si la commande est "MODE:STOP"
+  else if (strncmp((char*)rxBuffer, "MODE:STOP", strlen("MODE:STOP")) == 0) {
+      char msg_stop[MAX_BUFFER_SIZE] = "Mode stop activé\r\n";
+      HAL_UART_Transmit(&huart2, (uint8_t*)msg_stop, strlen(msg_stop), HAL_MAX_DELAY);
+      Motor_OFF(); // Arrêter le moteur
+      systemeInitialiszed = 0; // Réinitialiser l'état du système
+  }
+  // Commande inconnue ou mal formée
+  else {
+      char errorMsg[2 * MAX_BUFFER_SIZE];
+      snprintf(errorMsg, sizeof(errorMsg), "Erreur : commande inconnue ou mal formée : %s\r\n", rxBuffer);
+      HAL_UART_Transmit(&huart2, (uint8_t*)errorMsg, strlen(errorMsg), HAL_MAX_DELAY);
+  }
+
   rxIndex = 0; // Réinitialiser l'index du buffer
   memset(rxBuffer, 0, sizeof(rxBuffer)); // Réinitialiser le buffer
 }
